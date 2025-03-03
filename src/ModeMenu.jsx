@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "./ModeMenu.css";
 
-const ModeMenu = ({ showMenu, setShowMenu, setSelectedMode }) => {
+const ModeMenu = ({ showMenu, setShowMenu, setSelectedMode,shift,reset}) => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [secondSelectedItem, setSecondSelectedItem] = useState(null);
 
@@ -11,8 +11,9 @@ const ModeMenu = ({ showMenu, setShowMenu, setSelectedMode }) => {
     MATRIX: ["MatA", "MatB", "MatC"],
     VECTOR: ["vectA", "vectB", "vectC"],
     BASE_N: ["Decimal", "Binary", "Hexa", "Octal"],
-    STATISTICS: ["Option1", "Option2", "Option3"],
-    EQUATION: ["Type1", "Type2", "Type3"],
+    STATISTICS: [" 1-VAR"," A+BX", "--+CX²"," LN X"," eˣ","A·Bˣ"," A·Xˣ"," 1/X"],
+    EQUATION: ["anX + bnY = cn", "aXn + bnY + cnZ = dn", "aX² + bX + c = 0"," aX³ + bX² + cX + d = 0"],
+    
   };
 
   const secondMenuData = {
@@ -33,6 +34,7 @@ const ModeMenu = ({ showMenu, setShowMenu, setSelectedMode }) => {
       setSelectedMode(mode);
       setShowMenu(false);
     }
+    reset()
   };
 
   const handleSubMenuClick = (item) => {

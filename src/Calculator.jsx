@@ -5,13 +5,46 @@
   import down from './img/down-removebg-preview.png';
   import up from './img/up-removebg-preview.png';
   import ModeMenu from "./ModeMenu";
+  import HypeMenu from "./HypMenu";
+  import ShiftMenu from "./shift";
 
 
   function Calculator() {
     
     const [input, setInput] = useState('');
     const [showMenu, setShowMenu] = useState(false)
-    const [selectedMode, setSelectedMode] = useState("DEG");
+    const [selectedMode, setSelectedMode] = useState("Cmplx");
+    const [showHypeMenu, setshowHypeMenu] = useState(false)
+    const [shift , setshift] = useState(0)
+    const [shiftMenu, setshiftMenu] = useState(false)
+
+
+
+    function toogleshift(){
+      setshift((state)=>(
+          state==0?1:0
+      ))
+      
+  }
+  function resetshift(){
+      setshift(0)
+  }
+  
+
+  function selectmode(){
+    if(shift===1){
+      setShowMenu(false)
+      setshiftMenu(true)
+
+    }else{
+         setShowMenu(true)
+         setshiftMenu(false)
+    }
+
+    
+  }
+
+
    
 
 
@@ -39,12 +72,12 @@
        
           <div className="upperGrid">
           
-            <button className="shiftBtn">Shift</button>
+            <button className="shiftBtn" onClick={toogleshift} >Shift</button>
             <button className="alphaBtn">Alpha</button>
             
             <button className="arrowBtn"><img src={leftarrow} alt="Left Arrow" className="icon" /></button>
             <button className="arrowBtn" ><img src={rightarrow} alt="Right Arrow" className="icon" /></button>
-            <button className="modeBtn1"onClick={()=>setShowMenu(true)}>MODE</button>
+            <button className="modeBtn1"onClick={selectmode}>MODE</button>
            
       
  
@@ -107,7 +140,7 @@
             </div>
             <div>
               <p className="label">| x |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;c</p>
-              <button className="calcBtn">hyp</button>
+              <button className="calcBtn" onClick={()=>setshowHypeMenu(true)}>hyp</button>
             </div>
             <div>
               <p className="label">cos⁻¹&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;e</p>
@@ -256,6 +289,32 @@
           <ModeMenu
             showMenu={showMenu}
             setShowMenu={setShowMenu}
+            setSelectedMode={setSelectedMode} 
+            shift={shift}
+            reset={resetshift}
+          />
+        </div>
+      )}
+
+        {shiftMenu && (
+        <div className="modeMenuContainer">
+          <ShiftMenu
+            showShiftMenu={shiftMenu}
+            setShowShiftMenu={setshiftMenu}
+            setSelectedMode={setSelectedMode} 
+            shift={shift}
+            resetshift={resetshift}
+          />
+        </div>
+      )}
+      
+
+
+       {showHypeMenu && (
+        <div className="modeMenuContainer">
+          <HypeMenu
+            showHypeMenu={showHypeMenu}
+            setShowHypeMenu={setshowHypeMenu}
             setSelectedMode={setSelectedMode} 
           />
         </div>
