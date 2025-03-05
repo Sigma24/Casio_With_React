@@ -8,6 +8,7 @@
   import HypeMenu from "./HypMenu";
   import ShiftMenu from "./shift";
   import ConstMenu from "./const"
+  import Graph from "./graph";
 
 
   function Calculator() {
@@ -21,6 +22,16 @@
     const [shiftMenu, setshiftMenu] = useState(false)
     const [consmenu, setconsmenu] = useState(false)
     const [type, settype] = useState("degree")
+    const[graph , setgraph]=useState(false)
+
+
+
+
+    if (graph){
+      return <Graph/>
+    }
+
+   
 
 
 function types (){
@@ -38,7 +49,6 @@ function types (){
 
   }
 }
-
 let text;
 
 switch(type){
@@ -53,14 +63,7 @@ switch(type){
     break; 
 
 }
-
-
-
-
-
-
-
-    function seven(){
+function seven(){
       if (shift==1){
         setconsmenu(true)
       
@@ -69,10 +72,9 @@ switch(type){
         setInput((inp)=>inp+"7")
       }
 
-    }
+  }
 
-  
-    function toggleShift() {
+ function toggleShift() {
       setshift((prevShift) => {
         if (prevShift === 0) {
           setalpha(0); 
@@ -85,9 +87,7 @@ switch(type){
       setshift(0)
   }
 
-
-
-  function toggleAlpha() {
+function toggleAlpha() {
     setalpha((prevAlpha) => {
       if (prevAlpha === 0) {
         setshift(0); 
@@ -101,8 +101,6 @@ function resetalpha(){
     setalpha(0)
 }
 
-
-
 let text_sa;
 if(shift===1){
   text_sa="S"
@@ -114,12 +112,7 @@ if(shift===1){
 
 }
 
-
-
-
-  
-
-  function selectmode(){
+function selectmode(){
     if(shift===1){
       setShowMenu(false)
       setshiftMenu(true)
@@ -132,11 +125,7 @@ if(shift===1){
     
   }
 
-
-   
-
-
-    return (
+   return (
       <div className="calculatorContainer">
         <div className="mainView">
    
@@ -154,7 +143,7 @@ if(shift===1){
             <button className="modeBtn" onClick={types}>{text}</button>
             <button className="modeBtn">GRAD</button>
             <button className="modeBtn3">{text_sa}</button>
-            <button className="graphBtn">GRAPH</button>
+            <button className="graphBtn" onClick={()=>setgraph(true)}>GRAPH</button>
           </div>
 
        
@@ -420,6 +409,7 @@ if(shift===1){
         </div>
       )}
          
+     
     
       </div>
     );
