@@ -7,6 +7,7 @@
   import ModeMenu from "./ModeMenu";
   import HypeMenu from "./HypMenu";
   import ShiftMenu from "./shift";
+  import ConstMenu from "./const"
 
 
   function Calculator() {
@@ -16,19 +17,106 @@
     const [selectedMode, setSelectedMode] = useState("Cmplx");
     const [showHypeMenu, setshowHypeMenu] = useState(false)
     const [shift , setshift] = useState(0)
+    const [alpha , setalpha] = useState(0)
     const [shiftMenu, setshiftMenu] = useState(false)
+    const [consmenu, setconsmenu] = useState(false)
+    const [type, settype] = useState("degree")
 
 
-
-    function toogleshift(){
-      setshift((state)=>(
-          state==0?1:0
-      ))
+function types (){
+  switch(type){
+    case "degree":
+      settype("radian")
+      break;
+    case "radian":
+      settype("gradian")
+      break;
       
+   case "gradian":
+    settype("degree")  
+    break; 
+
   }
+}
+
+let text;
+
+switch(type){
+  case "degree":
+  text="DEG"
+  break;
+  case "radian":
+    text = "RAD"
+    break;
+  case "gradian":
+    text= "GRAD" 
+    break; 
+
+}
+
+
+
+
+
+
+
+    function seven(){
+      if (shift==1){
+        setconsmenu(true)
+      
+      }
+      else{
+        setInput((inp)=>inp+"7")
+      }
+
+    }
+
+  
+    function toggleShift() {
+      setshift((prevShift) => {
+        if (prevShift === 0) {
+          setalpha(0); 
+          return 1;
+        }
+        return 0;
+      });
+    }
   function resetshift(){
       setshift(0)
   }
+
+
+
+  function toggleAlpha() {
+    setalpha((prevAlpha) => {
+      if (prevAlpha === 0) {
+        setshift(0); 
+        return 1;
+      }
+      return 0;
+    });
+  }
+  
+function resetalpha(){
+    setalpha(0)
+}
+
+
+
+let text_sa;
+if(shift===1){
+  text_sa="S"
+
+}else if(alpha===1){
+ 
+  text_sa="A"
+
+
+}
+
+
+
+
   
 
   function selectmode(){
@@ -63,17 +151,17 @@
 
          
           <div className="modeContainer">
-            <button className="modeBtn">DEG</button>
+            <button className="modeBtn" onClick={types}>{text}</button>
             <button className="modeBtn">GRAD</button>
-            <button className="modeBtn">RAD</button>
+            <button className="modeBtn3">{text_sa}</button>
             <button className="graphBtn">GRAPH</button>
           </div>
 
        
           <div className="upperGrid">
           
-            <button className="shiftBtn" onClick={toogleshift} >Shift</button>
-            <button className="alphaBtn">Alpha</button>
+            <button className="shiftBtn" onClick={toggleShift} >Shift</button>
+            <button className="alphaBtn" onClick={toggleAlpha}>Alpha</button>
             
             <button className="arrowBtn"><img src={leftarrow} alt="Left Arrow" className="icon" /></button>
             <button className="arrowBtn" ><img src={rightarrow} alt="Right Arrow" className="icon" /></button>
@@ -191,7 +279,7 @@
             {/* Row 1 */}
             <div>
               <p className="label1">CONST</p>
-              <button className="numberBtn">7</button>
+              <button className="numberBtn" onClick={seven}>7</button>
             </div>
             <div>
               <p className="label1">CONV SI</p>
@@ -316,6 +404,18 @@
             showHypeMenu={showHypeMenu}
             setShowHypeMenu={setshowHypeMenu}
             setSelectedMode={setSelectedMode} 
+          />
+        </div>
+      )}
+
+{consmenu && (
+        <div className="modeMenuContainer">
+          <ConstMenu
+            showConstMenu={consmenu}
+            setShowConstMenu={setconsmenu}
+            setSelectedMode={setSelectedMode}
+            shift={shift}
+            resetshift={resetshift} 
           />
         </div>
       )}
