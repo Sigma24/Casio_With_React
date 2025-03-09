@@ -7,7 +7,7 @@ import { useState } from 'react';
 
    
 
-const Graph = ({ onClose }) => {
+const Graph = ({}) => {
   const data = Array.from({ length: 21 }, (_, i) => {
     let x = i - 10;
     return { x: x, y: x * x };

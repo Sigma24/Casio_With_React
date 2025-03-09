@@ -9,6 +9,7 @@
   import ShiftMenu from "./shift";
   import ConstMenu from "./const"
   import Graph from "./graph";
+  import ConvBtnMenu from "./conv";
 
 
   function Calculator() {
@@ -23,6 +24,7 @@
     const [consmenu, setconsmenu] = useState(false)
     const [type, settype] = useState("degree")
     const[graph , setgraph]=useState(false)
+    const [convmenu, setconvmenu] = useState(false)
 
 
 
@@ -73,6 +75,15 @@ function seven(){
       }
 
   }
+
+function eight(){
+  if (shift==1){
+    setconvmenu(true)
+  }
+  else{
+    setInput((inp)=>inp+'8')
+  }
+}  
 
  function toggleShift() {
       setshift((prevShift) => {
@@ -272,7 +283,7 @@ function selectmode(){
             </div>
             <div>
               <p className="label1">CONV SI</p>
-              <button className="numberBtn">8</button>
+              <button className="numberBtn" onClick={eight}>8</button>
             </div>
             <div>
               <p className="label1">Limit</p>
@@ -409,6 +420,18 @@ function selectmode(){
         </div>
       )}
          
+
+         {convmenu && (
+        <div className="modeMenuContainer">
+          <ConvBtnMenu
+            showConvMenu={convmenu}
+            setShowConvMenu={setconvmenu}
+            setSelectedMode={setSelectedMode}
+            shift={shift}
+            resetshift={resetshift} 
+          />
+        </div>
+      )}
      
     
       </div>
