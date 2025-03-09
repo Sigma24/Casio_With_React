@@ -10,6 +10,7 @@
   import ConstMenu from "./const"
   import Graph from "./graph";
   import ConvBtnMenu from "./conv";
+  import  MatrixShift from "./matrix"
 
 
   function Calculator() {
@@ -25,6 +26,7 @@
     const [type, settype] = useState("degree")
     const[graph , setgraph]=useState(false)
     const [convmenu, setconvmenu] = useState(false)
+    const [matrix, setmatrix] = useState(false)
 
 
 
@@ -84,6 +86,19 @@ function eight(){
     setInput((inp)=>inp+'8')
   }
 }  
+
+
+function four(){
+  if (shift==1){
+    setmatrix(true)
+  }
+  else{
+    setInput((inp)=>inp+'4')
+  }
+} 
+
+
+
 
  function toggleShift() {
       setshift((prevShift) => {
@@ -302,7 +317,7 @@ function selectmode(){
             {/* Row 2 */}
             <div>
               <p className="label1">MATRIX</p>
-              <button className="numberBtn">4</button>
+              <button className="numberBtn" onClick={four}>4</button>
             </div>
             <div>
               <p className="label1">VECTOR</p>
@@ -426,6 +441,19 @@ function selectmode(){
           <ConvBtnMenu
             showConvMenu={convmenu}
             setShowConvMenu={setconvmenu}
+            setSelectedMode={setSelectedMode}
+            shift={shift}
+            resetshift={resetshift} 
+          />
+        </div>
+      )}
+
+
+{matrix && (
+        <div className="modeMenuContainer">
+          <MatrixShift
+            showMatrixMenu={matrix}
+            setShowMatrixMenu={setmatrix}
             setSelectedMode={setSelectedMode}
             shift={shift}
             resetshift={resetshift} 
