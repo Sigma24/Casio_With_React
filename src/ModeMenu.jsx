@@ -1,19 +1,18 @@
 import React, { useState } from "react";
 import "./ModeMenu.css";
 
-const ModeMenu = ({ showMenu, setShowMenu, setSelectedMode,shift,reset}) => {
+const ModeMenu = ({ showMenu, setShowMenu, setSelectedMode, shift, reset }) => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [secondSelectedItem, setSecondSelectedItem] = useState(null);
 
-  const Mode = ["CMPLX", "BASE_N", "STATISTICS", "EQUATION", "TABLE", "MATRIX", "VECTOR"];
+  const Mode = ["MATH", "CMPLX", "BASEN", "STATISTICS", "EQUATION", "TABLE", "MATRIX", "VECTOR"];
 
   const subMenuData = {
     MATRIX: ["MatA", "MatB", "MatC"],
     VECTOR: ["vectA", "vectB", "vectC"],
-    BASE_N: ["Decimal", "Binary", "Hexa", "Octal"],
-    STATISTICS: [" 1-VAR"," A+BX", "--+CX²"," LN X"," eˣ","A·Bˣ"," A·Xˣ"," 1/X"],
-    EQUATION: ["anX + bnY = cn", "aXn + bnY + cnZ = dn", "aX² + bX + c = 0"," aX³ + bX² + cX + d = 0"],
-    
+    BASEN: ["Decimal", "Binary", "Hexa", "Octal"],
+    STATISTICS: ["1-VAR", "A+BX", "--+CX²", "LN X", "eˣ", "A·Bˣ", "A·Xˣ", "1/X"],
+    EQUATION: ["anX + bnY = cn", "aXn + bnY + cnZ = dn", "aX² + bX + c = 0", "aX³ + bX² + cX + d = 0"],
   };
 
   const secondMenuData = {
@@ -27,30 +26,27 @@ const ModeMenu = ({ showMenu, setShowMenu, setSelectedMode,shift,reset}) => {
 
   const handleModeClick = (mode) => {
     if (subMenuData[mode]) {
-      // If the mode has a submenu, open it
+      setSelectedMode(mode); 
       setSelectedItem(mode);
     } else {
-      // If no submenu, select and close immediately
       setSelectedMode(mode);
       setShowMenu(false);
+      reset();
     }
-    reset()
   };
 
   const handleSubMenuClick = (item) => {
     if (secondMenuData[item]) {
-      // If it has a second submenu, open it
       setSecondSelectedItem(item);
     } else {
-      // Otherwise, select it and close
-      setSelectedMode(item);
+     
       setShowMenu(false);
       setSelectedItem(null);
     }
   };
 
   const handleSecondSubMenuClick = (item) => {
-    setSelectedMode(item);
+    
     setShowMenu(false);
     setSelectedItem(null);
     setSecondSelectedItem(null);

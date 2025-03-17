@@ -5,6 +5,8 @@
   align-items: center;
   min-height: 100vh;
   background-color: #f0f0f0;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
 .mainView {
@@ -13,44 +15,66 @@
   color: white;
   border-radius: 20px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  width: 380px; 
+  width: 95%; 
+  max-width: 380px; 
+  box-sizing: border-box;
 }
 
 
 .textInputContainer {
   margin-top: 10px;
-  width: 356px;
-  margin-bottom: 10px; 
-}
-
-.textInput {
   width: 100%;
-  height: 120px; 
+  margin-bottom: 10px;
   background-color: #D3EBD3;
   border-radius: 10px;
+  padding: 0;
+  border: 2px solid #000;
+  display: flex;
+  flex-direction: column;
+}
+
+.textInput,
+.answerTextArea {
+  width: 100%;
+  height: 55px;
+  background-color: transparent;
   padding: 10px;
-  font-size: 16px;
+  font-size: clamp(14px, 4vw, 16px); 
   resize: none;
+  border: none;
+  outline: none;
+  box-shadow: none;
+}
+
+.answerTextArea {
+  text-align: right;
+  direction: ltr;
+  padding: 10px;
+  box-sizing: border-box;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  width: 100%;
+  margin: 0;
 }
 
 
 .modeContainer {
   display: flex;
+  justify-content: space-between;
   margin-top: 5px;
 }
 
 .graphBtn {
   background-color: red;
   color: white;
-  margin-left: 125px;
   border: none;
   border-radius: 5px;
   padding: 6px 10px;
   cursor: pointer;
-  font-size: 12px;
-  margin-bottom: 30px;
+  font-size: clamp(10px, 3vw, 12px); 
   height: 32px;
-  width: 80px; 
+  width: 20%; 
 }
 
 .modeBtn {
@@ -59,42 +83,37 @@
   border: none;
   border-radius: 80px;
   cursor: pointer;
-  width: 42px;
+  width: 20%; 
   height: 22px;
-  font-size: 11px;
-  margin-left: 14px;
+  font-size: clamp(8px, 2.5vw, 11px);
   font-weight: bold;
-  margin-bottom: 30px; 
 }
-.modeBtn3{
+
+.modeBtn3 {
   background-color: rgb(0, 0, 0);
   color: white;
   border: none;
   border-radius: 80px;
   cursor: pointer;
-  width: 40px;
+  width: 20%; 
   height: 22px;
-  font-size: 11px;
+  font-size: clamp(8px, 2.5vw, 11px); 
   font-weight: bolder;
-  font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-  margin-left: 14px;
-  margin-bottom: 30px; 
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
 }
+
 
 .upperGrid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  grid-template-rows: repeat(5, minmax(20px, auto)); /* Reduce row height */
-  gap: 1px; /* Reduce gap */
-  margin-top: px; 
-  
+  grid-template-columns: repeat(6, minmax(40px, 1fr));
+  grid-template-rows: repeat(5, minmax(20px, auto));
+  gap: 4px; 
+  margin-top: 10px;
 }
 
 .upperGrid button:nth-child(6) {
   visibility: hidden;
 }
-
-
 
 .upperGrid .calcBtn,
 .upperGrid .arrowBtn,
@@ -104,42 +123,40 @@
   border: none;
   border-radius: 10px;
   cursor: pointer;
-  font-size: 14px;
-  font-weight: bold; 
+  font-size: clamp(10px, 3vw, 14px); 
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 55px;
-  height: 25px; 
+  width: 100%; 
+  height: 25px;
 }
 
-.modeBtn1{
+.modeBtn1 {
   background-color: #D9D9D9;
   color: black;
-  
   border: none;
   border-radius: 10px;
   cursor: pointer;
-  font-size: 12px;
-  font-weight: bold; 
+  font-size: clamp(10px, 3vw, 12px); 
+  font-weight: bold;
   display: flex;
   align-items: center;
   justify-content: center;
-  
-  width: 70px;
-  height: 25px; 
+  width: 100%; 
+  height: 25px;
 }
+
 .arrowBtn1 {
   background-color: #D9D9D9;
   border: none;
   border-radius: 10px;
   cursor: pointer;
-  font-size: 12px;
+  font-size: clamp(10px, 3vw, 12px); 
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 30px; 
-  width: 55px;
+  margin-top: 30px;
+  width: 100%; 
   height: 25px;
 }
 
@@ -164,20 +181,19 @@
 
 .upperGrid .label {
   color: white;
-  font-size: 12px;
-  margin-bottom: 2px; 
+  font-size: clamp(8px, 2.5vw, 12px); 
+  margin-bottom: 2px;
   text-align: center;
-  margin-right: 5px; 
+  margin-right: 5px;
 }
 
-
+/* Lower Grid */
 .lowerGrid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr); 
-  grid-template-rows: repeat(4, 1fr); 
-  gap: 2px; 
+  grid-template-columns: repeat(5, minmax(40px, 1fr)); 
+  grid-template-rows: repeat(4, minmax(30px, auto));
+  gap: 4px; 
   align-items: center;
-  
 }
 
 .lowerGrid .numberBtn,
@@ -189,13 +205,13 @@
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 13px;
+  font-size: clamp(10px, 3vw, 13px);
   font-weight: bold;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 65px;
-  height: 34px; 
+  width: 100%;
+  height: 34px;
 }
 
 .lowerGrid .deleteBtn,
@@ -214,22 +230,18 @@
 
 
 .label1 {
-  font-size: 10px;
- 
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    font-size: 12px; 
-    margin-bottom: 5px; 
-    line-height: 1; /* Reduce spacing between text lines */
-
+  font-size: clamp(8px, 2.5vw, 10px); 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 5px;
+  line-height: 1;
 }
 
 .label3 {
   color: white;
-  font-size: 12px;
-  margin-bottom: 2px; /* Reduced spacing */
+  font-size: clamp(8px, 2.5vw, 12px);
+  margin-bottom: 2px;
   text-align: center;
   margin-right: 5px;
 }
-

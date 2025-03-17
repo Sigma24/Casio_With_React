@@ -1,4 +1,4 @@
-  import React, { useState } from "react";
+  import React, { useState,useEffect } from "react";
   import './Calculator.css'; 
   import leftarrow from './img/left-removebg-preview.png';
   import rightarrow from './img/right-removebg-preview.png';
@@ -11,13 +11,20 @@
   import Graph from "./graph";
   import ConvBtnMenu from "./conv";
   import  MatrixShift from "./matrix"
+  import BaseShift from "./base_n";
+  import CmplxShift from "./cmplx";
+  import StatsShift from "./stats";
+  import VectorShift from "./vector";
+  import { useRef } from "react";
 
 
   function Calculator() {
     
     const [input, setInput] = useState('');
+    const [answer, setanswer] = useState('222222');
+    const [cursorPosition, setCursorPosition] = useState(0);
     const [showMenu, setShowMenu] = useState(false)
-    const [selectedMode, setSelectedMode] = useState("Cmplx");
+    const [selectedMode, setSelectedMode] = useState("MATH");
     const [showHypeMenu, setshowHypeMenu] = useState(false)
     const [shift , setshift] = useState(0)
     const [alpha , setalpha] = useState(0)
@@ -27,13 +34,124 @@
     const[graph , setgraph]=useState(false)
     const [convmenu, setconvmenu] = useState(false)
     const [matrix, setmatrix] = useState(false)
+    const [vector, setvctor] = useState(false)
+    const [base, setbase] = useState(false)
+    const [cmplx, setcmplx] = useState(false)
+    const [stat, setstat] = useState(false)
+    const textAreaRef = useRef(null);
+    const [selectedmatData, setSelectedmatData] = useState(""); 
+    const [selectedvectData, setSelectedvectData] = useState(""); 
+
+
+
+let modebtntext="Math";
+switch(selectedMode){
+  case "MATRIX":
+    modebtntext="Mat"
+    break;
+  case "CMPLX":
+    modebtntext="Cmlx"
+    break;
+
+  case "BASEN":
+    modebtntext="Base_n"
+    break;
+  case "STATISTICS":
+    modebtntext="Stat"
+    break;
+  case "EQUATION":
+    modebtntext="Equ"
+    break;
+  case "TABLE":
+    modebtntext="Table"
+    break;
+  case "VECTOR":
+    modebtntext="vect"
+    break;          
+      
+} 
 
 
 
 
-    if (graph){
-      return <Graph/>
+
+
+
+function hell(){
+  alert("hell")
+}
+    
+    
+
+
+    const handleChange = (e) => {
+      setInput(e.target.value);
+      setCursorPosition(e.target.selectionStart);
+  };
+
+ 
+  const cursor = (direction) => {
+    const textArea = textAreaRef.current;
+    if (!textArea) return;
+
+    textArea.focus();
+
+    const textBeforeCursor = input.slice(0, cursorPosition);
+    const lines = textBeforeCursor.split('\n');
+    const currentLineIndex = lines.length - 1;
+    const currentLinePosition = lines[currentLineIndex].length;
+
+    if (direction === 'left' && cursorPosition > 0) {
+        setCursorPosition((prev) => prev - 1);
+    } 
+    else if (direction === 'right' && cursorPosition < input.length) {
+        setCursorPosition((prev) => prev + 1);
     }
+    else if (direction === 'up') {
+        const prevLineLength = lines[currentLineIndex - 1]?.length || 0;
+        setCursorPosition(cursorPosition - currentLinePosition - 1 - prevLineLength);
+    }
+    else if (direction === 'down') {
+        const remainingText = input.slice(cursorPosition);
+        const nextLineLength = remainingText.split('\n')[0]?.length || 0;
+        setCursorPosition(cursorPosition + nextLineLength + 1);
+    }
+};
+
+
+useEffect(() => {
+    const textArea = textAreaRef.current;
+    if (textArea) {
+        textArea.focus();
+        textArea.setSelectionRange(cursorPosition, cursorPosition);
+    }
+}, [cursorPosition]);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const MatrixDataSelect = (item) => {
+  setInput((inp) => inp + item); 
+  setSelectedmatData(item);
+};
+
+const vectorDataSelect = (item) => {
+  setInput((inp) => inp + item); 
+  setSelectedvectData(item);
+};
+
+
+
 
    
 
@@ -89,13 +207,64 @@ function eight(){
 
 
 function four(){
-  if (shift==1){
+  if (shift==1&&selectedMode==="MATRIX"){
     setmatrix(true)
   }
   else{
     setInput((inp)=>inp+'4')
   }
 } 
+
+function five(){
+  if (shift==1&&selectedMode==="VECTOR"){
+    setvctor(true)
+    
+  }
+  else{
+    setInput((inp)=>inp+'5')
+  }
+} 
+
+
+
+function two(){
+  if (shift==1&&selectedMode==="CMPLX"){
+    setcmplx(true)
+
+  }
+  else{
+    setInput((inp)=>inp+'2')
+  }
+} 
+
+function one(){
+  if (shift==1&&selectedMode==="STATISTICS"){
+    setstat(true)
+  }
+  else{
+    setInput((inp)=>inp+'1')
+  }
+} 
+
+
+
+function three(){
+  if (shift==1&&selectedMode==="BASEN"){
+    setbase(true)
+  }
+  else{
+    setInput((inp)=>inp+'3')
+  }
+} 
+
+function cut(){
+  setInput((inp)=>(inp.slice(0,-1)))
+}
+
+function clr(){
+  setInput(" ")
+}
+
 
 
 
@@ -155,19 +324,27 @@ function selectmode(){
       <div className="calculatorContainer">
         <div className="mainView">
    
-          <div className="textInputContainer">
-            <textarea 
-              className="textInput" 
-              value={input} 
-              onChange={(e) => setInput(e.target.value)}
-              rows="5"
-            />
-          </div>
+        <div className="textInputContainer">
+    <textarea 
+        className="textInput" 
+        ref={textAreaRef}
+        value={input}
+        onChange={handleChange}
+        onClick={(e) => setCursorPosition(e.target.selectionStart)}
+    />
+    <textarea 
+        className="answerTextArea"
+        value={answer}
+        readOnly
+    />
+</div>
+
+
 
          
           <div className="modeContainer">
             <button className="modeBtn" onClick={types}>{text}</button>
-            <button className="modeBtn">GRAD</button>
+            <button className="modeBtn">{modebtntext}</button>
             <button className="modeBtn3">{text_sa}</button>
             <button className="graphBtn" onClick={()=>setgraph(true)}>GRAPH</button>
           </div>
@@ -178,8 +355,8 @@ function selectmode(){
             <button className="shiftBtn" onClick={toggleShift} >Shift</button>
             <button className="alphaBtn" onClick={toggleAlpha}>Alpha</button>
             
-            <button className="arrowBtn"><img src={leftarrow} alt="Left Arrow" className="icon" /></button>
-            <button className="arrowBtn" ><img src={rightarrow} alt="Right Arrow" className="icon" /></button>
+            <button className="arrowBtn"><img src={leftarrow} alt="Left Arrow" className="icon" onClick={()=>cursor('left')} /></button>
+            <button className="arrowBtn" ><img src={rightarrow} alt="Right Arrow" className="icon" onClick={()=>cursor('right') } /></button>
             <button className="modeBtn1"onClick={selectmode}>MODE</button>
            
       
@@ -195,8 +372,8 @@ function selectmode(){
               <p className="label">d/dx</p>
               <button className="calcBtn">∫<sup>x</sup><sub>y</sub></button>
             </div>
-            <button className="arrowBtn1"><img src={up} alt="Up Arrow" className="icon" /></button>
-            <button className="arrowBtn1"><img src={down} alt="Down Arrow" className="icon" /></button>
+            <button className="arrowBtn1"><img src={up} alt="Up Arrow" className="icon" onClick={()=>cursor('up')} /></button>
+            <button className="arrowBtn1"><img src={down} alt="Down Arrow" className="icon" onClick={()=>cursor('down')} /></button>
             <div>
               <p className="label">x!</p>
               <button className="calcBtn">x⁻¹</button>
@@ -232,7 +409,7 @@ function selectmode(){
               <button className="calcBtn">Ln</button>
             </div>
 
-            {/* Row 4 */}
+            
             <div>
               <p className="label">∠&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a</p>
               <button className="calcBtn">(-)</button>
@@ -258,7 +435,7 @@ function selectmode(){
               <button className="calcBtn">tan</button>
             </div>
 
-            {/* Row 5 */}
+          
             <div>
               <p className="label3">STO&nbsp;&nbsp;CLRv</p>
               <button className="calcBtn">RCL</button>
@@ -289,9 +466,9 @@ function selectmode(){
          
        
 
-          {/* Lower Grid (4x5) */}
+         
           <div className="lowerGrid">
-            {/* Row 1 */}
+            
             <div>
               <p className="label1">CONST</p>
               <button className="numberBtn" onClick={seven}>7</button>
@@ -306,22 +483,22 @@ function selectmode(){
             </div>
             <div>
               <p className="label1">&nbsp;</p>
-              <button className="deleteBtn">⌫</button>
+              <button className="deleteBtn" onClick={cut}>⌫</button>
             </div>
             
             <div>
               <p className="label1">CLR ALL</p>
-              <button className="deleteBtn">AC</button>
+              <button className="deleteBtn" onClick={clr}>AC</button>
             </div>
 
-            {/* Row 2 */}
+           
             <div>
               <p className="label1">MATRIX</p>
               <button className="numberBtn" onClick={four}>4</button>
             </div>
             <div>
               <p className="label1">VECTOR</p>
-              <button className="numberBtn">5</button>
+              <button className="numberBtn" onClick={five}>5</button>
             </div>
             <div>
               <p className="label1">FNC HELP</p>
@@ -339,18 +516,18 @@ function selectmode(){
             </div>
           
 
-            {/* Row 3 */}
+          
             <div>
               <p className="label1">STAT</p>
-              <button className="numberBtn">1</button>
+              <button className="numberBtn" onClick={one}>1</button>
             </div>
             <div>
               <p className="label1">COMPLX</p>
-              <button className="numberBtn">2</button>
+              <button className="numberBtn" onClick={two}>2</button>
             </div>
             <div>
               <p className="label1">DISTR</p>
-              <button className="numberBtn">3</button>
+              <button className="numberBtn" onClick={three}>3</button>
             </div>
             <div>
               <p className="label1">Pol Cell</p>
@@ -362,7 +539,7 @@ function selectmode(){
               <button className="operatorBtn">-</button>
             </div>
 
-            {/* Row 4 */}
+            
             <div>
               <p className="label1">copy paste </p>
               <button className="numberBtn">0</button>
@@ -412,8 +589,7 @@ function selectmode(){
       )}
       
 
-
-       {showHypeMenu && (
+    {showHypeMenu && (
         <div className="modeMenuContainer">
           <HypeMenu
             showHypeMenu={showHypeMenu}
@@ -436,7 +612,7 @@ function selectmode(){
       )}
          
 
-         {convmenu && (
+      {convmenu && (
         <div className="modeMenuContainer">
           <ConvBtnMenu
             showConvMenu={convmenu}
@@ -449,18 +625,76 @@ function selectmode(){
       )}
 
 
-{matrix && (
+  {matrix && (
         <div className="modeMenuContainer">
           <MatrixShift
             showMatrixMenu={matrix}
             setShowMatrixMenu={setmatrix}
-            setSelectedMode={setSelectedMode}
+            onDataSelect={MatrixDataSelect}
             shift={shift}
             resetshift={resetshift} 
           />
         </div>
       )}
      
+     {vector && (
+        <div className="modeMenuContainer">
+          <VectorShift
+            showVectorMenu={vector}
+            setShowVectorMenu={setvctor}
+            shift={shift}
+            resetshift={resetshift} 
+            onDataSelect={vectorDataSelect}
+          />
+        </div>
+      )}
+
+{base && (
+        <div className="modeMenuContainer">
+          <BaseShift
+            showBaseMenu={base}
+            setShowBaseMenu={setbase}
+            setSelectedMode={setSelectedMode}
+            shift={shift}
+            resetshift={resetshift} 
+          />
+        </div>
+      )}
+
+{cmplx && (
+        <div className="modeMenuContainer">
+          <CmplxShift
+            showCmplxMenu={cmplx}
+            setShowCmplxMenu={setcmplx}
+            setSelectedMode={setSelectedMode}
+            shift={shift}
+            resetshift={resetshift} 
+          />
+        </div>
+      )}
+
+{stat && (
+        <div className="modeMenuContainer">
+          <StatsShift
+            showStatsMenu={stat}
+            setShowStatsMenu={setstat}
+            setSelectedMode={setSelectedMode}
+            shift={shift}
+            resetshift={resetshift} 
+          />
+        </div>
+      )}
+
+
+  {graph&& 
+  (
+  <Graph onClose={()=>setgraph(false)}/>)
+    }
+
+
+    
+
+
     
       </div>
     );

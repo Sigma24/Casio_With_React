@@ -1,19 +1,19 @@
 import React, { useState } from "react";
 import "./matrix.css";
 
-const MatrixShift = ({ showMatrixMenu, setShowMatrixMenu, shift, resetshift, onDataSelect }) => {
+const VectorShift = ({ showVectorMenu, setShowVectorMenu, shift, resetshift, onDataSelect }) => {
   
   const [selectedItem, setSelectedItem] = useState(null);
 
-  const conversions = ["matA", "matB", "matC", "Data", "Transpose", "Determinant"];
-  const dataSubMenu = ["MatA", "MatB", "MatC"];
+  const vectors = ["vectA", "vectB", "vectC", "Data", "Dot"];
+  const dataSubMenu = ["vectA", "vectB", "vectC"];
 
-  const handleConversionClick = (matrix) => {
-    if (matrix === "Data") {
+  const handleConversionClick = (vector) => {
+    if (vector === "Data") {
       setSelectedItem("Data"); 
     } else {
-      console.log("Selected Conversion:", matrix);
-      setShowMatrixMenu(false);
+      console.log("Selected Conversion:", vector);
+      setShowVectorMenu(false);
       resetshift();
     }
   };
@@ -21,23 +21,23 @@ const MatrixShift = ({ showMatrixMenu, setShowMatrixMenu, shift, resetshift, onD
   const handleDataClick = async (item) => {
     console.log(`Data selected for: ${item}`);
 
-    // Send selected data back to the main component
+  
     onDataSelect(item); 
     
-    setShowMatrixMenu(false);
+    setShowVectorMenu(false);
     setSelectedItem(null);
   };
 
   return (
     <>
-      {showMatrixMenu && !selectedItem && (
+      {showVectorMenu && !selectedItem && (
         <div className="menu">
-          <a href="#" className="cancel" onClick={() => setShowMatrixMenu(false)}>
+          <a href="#" className="cancel" onClick={() => setShowVectorMenu(false)}>
             Cancel
           </a>
           <p className="menu-title">MATRIX</p>
           <ul className="menu-list">
-            {conversions.map((conversion, index) => (
+            {vectors.map((conversion, index) => (
               <li
                 key={index}
                 className="menu-item"
@@ -73,4 +73,4 @@ const MatrixShift = ({ showMatrixMenu, setShowMatrixMenu, shift, resetshift, onD
   );
 };
 
-export default MatrixShift;
+export default VectorShift;

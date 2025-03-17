@@ -2,42 +2,31 @@
 import React from "react";
 import "./conv.css";
 
-const ConvBtnMenu = ({ showConvMenu, setShowConvMenu, shift, resetshift }) => {
+const StatsShift = ({ showStatsMenu, setShowStatsMenu, shift, resetshift }) => {
   
   const conversions =  [
-    "in ► cm",
-    "cm ► in",
-    "ft ► m",
-    "m ► ft",
-    "yd ► m",
-    "m ► yd",
-    "mile ► km",
-    "km ► mile",
-    "n mile ► m",
-    "nm ► n mile",
-    "acre ► m²",
-    "m² ► acre",
-    "pc ► km",
-    "km ► pc",
-    "oz ► g",
-    "g ► oz",
-    "lb ► kg",
-    "kg ► lb",
-    "pa ► atm",
-    "atm ► pa"
-  ];;
+    "1-Var",      
+    "A+BX",       
+    "+cx²",  
+    "ln x",      
+    "e^x",    
+    "A.B^X",
+    "A.X^B",       
+    "1/X",       
+];
+
 
   const handleConversionClick = (conversion) => {
     console.log("Selected Conversion:", conversion);
-    setShowConvMenu(false);
+    setShowStatsMenu(false);
     resetshift();
   };
 
   return (
     <>
-      {showConvMenu && (
+      {showStatsMenu && (
         <div className="menu">
-          <a href="#" className="cancel" onClick={() => setShowConvMenu(false)}>
+          <a href="#" className="cancel" onClick={() => setShowStatsMenu(false)}>
             Cancel
           </a>
           <p className="menu-title">SELECT CONVERSION</p>
@@ -54,4 +43,4 @@ const ConvBtnMenu = ({ showConvMenu, setShowConvMenu, shift, resetshift }) => {
   );
 };
 
-export default ConvBtnMenu;
+export default StatsShift;
