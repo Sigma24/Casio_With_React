@@ -16,12 +16,13 @@
   import StatsShift from "./stats";
   import VectorShift from "./vector";
   import { useRef } from "react";
+import { evaluateExpression } from "./eval";
 
 
   function Calculator() {
     
     const [input, setInput] = useState('');
-    const [answer, setanswer] = useState('222222');
+    const [answer, setanswer] = useState('');
     const [cursorPosition, setCursorPosition] = useState(0);
     const [showMenu, setShowMenu] = useState(false)
     const [selectedMode, setSelectedMode] = useState("MATH");
@@ -70,6 +71,8 @@ switch(selectedMode){
     break;          
       
 } 
+
+
 
 
 
@@ -316,9 +319,25 @@ function selectmode(){
          setShowMenu(true)
          setshiftMenu(false)
     }
+}
 
-    
+
+function sin(){
+   if(shift===1){
+    setInput(inp=>inp+"arcsin(")
+   }
+   else{
+      setInput(inp=>inp+"sin(")
+   }
+}
+
+function evaluate(){
+  if(input){
+    console.log(evaluateExpression(input));
+    setanswer((evalu)=>evalu+evaluateExpression(input))
+  
   }
+}
 
    return (
       <div className="calculatorContainer">
@@ -423,11 +442,11 @@ function selectmode(){
               <button className="calcBtn" onClick={()=>setshowHypeMenu(true)}>hyp</button>
             </div>
             <div>
-              <p className="label">cos⁻¹&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;e</p>
-              <button className="calcBtn">sin</button>
+              <p className="label">sin⁻¹&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;e</p>
+              <button className="calcBtn" onClick={()=>sin()} >sin</button>
             </div>
             <div>
-              <p className="label">sin⁻¹&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;d</p>
+              <p className="label">cos⁻¹&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;d</p>
               <button className="calcBtn">cos</button>
             </div>
             <div>
@@ -560,7 +579,7 @@ function selectmode(){
 
             <div>
             <p className="label1">HISTORY</p>
-            <button className="equalsBtn">=</button>
+            <button className="equalsBtn" onClick={()=>evaluate()}>=</button>
             </div>
           </div>
         </div>
