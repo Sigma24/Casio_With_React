@@ -1,12 +1,19 @@
 import React from "react";
 import "./HypMenu.css";
 
-const HypeMenu = ({ showHypeMenu, setShowHypeMenu, setSelectedMode }) => {
-  const modes = ["Sinh", "Cosh" , "Tanh","Sinh⁻¹","Cosh⁻¹","Tanh⁻¹"];
+const HypeMenu = ({ showHypeMenu, setShowHypeMenu, setInput }) => {
+  const modes = [
+    { label: "Sinh", func: "sinh(" },
+    { label: "Cosh", func: "cosh(" },
+    { label: "Tanh", func: "tanh(" },
+    { label: "Sinh⁻¹", func: "arcsinh(" },
+    { label: "Cosh⁻¹", func: "arccosh(" },
+    { label: "Tanh⁻¹", func: "arctanh(" },
+  ];
 
   const handleModeClick = (mode) => {
-    setSelectedMode(mode); 
-    setShowHypeMenu(false); 
+    setInput((prev) => prev + mode.func);  // ✅ Insert function directly
+    setShowHypeMenu(false);
   };
 
   return (
@@ -20,14 +27,15 @@ const HypeMenu = ({ showHypeMenu, setShowHypeMenu, setSelectedMode }) => {
           <ul className="menu-list">
             {modes.map((mode, index) => (
               <li key={index} className="menu-item" onClick={() => handleModeClick(mode)}>
-                {index + 1}: {mode}
+                {index + 1}: {mode.label}
               </li>
             ))}
           </ul>
         </div>
-      )}    
+      )}
     </>
   );
 };
+
 
 export default HypeMenu;

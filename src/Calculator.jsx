@@ -42,6 +42,9 @@ import { evaluateExpression } from "./eval";
     const textAreaRef = useRef(null);
     const [selectedmatData, setSelectedmatData] = useState(""); 
     const [selectedvectData, setSelectedvectData] = useState(""); 
+    const[hyp,sethyp]=useState("")
+    const [dmsMode, setDmsMode] = useState(false);
+const [originalDecimal, setOriginalDecimal] = useState(null);
 
 
 
@@ -73,18 +76,39 @@ switch(selectedMode){
 } 
 
 
+function plus(){
+setInput((inp)=>inp+'+')
+}
 
 
+function mins(){
+setInput((inp)=>inp+'-')
+}
 
 
+function mul(){
+setInput((inp)=>inp+'×')
+}
 
+
+function div(){
+setInput((inp)=>inp+'÷')
+}
 
 
 function hell(){
   alert("hell")
 }
     
-    
+    function closebracl(){
+  setInput((inp)=>inp+')')
+}
+
+ function openbrack(){
+  setInput((inp)=>inp+'(')
+ }
+
+
 
 
     const handleChange = (e) => {
@@ -199,6 +223,11 @@ function seven(){
 
   }
 
+  function nine(){
+  setInput((inp)=>inp+'9')
+}
+
+
 function eight(){
   if (shift==1){
     setconvmenu(true)
@@ -217,6 +246,10 @@ function four(){
     setInput((inp)=>inp+'4')
   }
 } 
+
+function six(){
+  setInput((inp)=>inp+'6')
+}
 
 function five(){
   if (shift==1&&selectedMode==="VECTOR"){
@@ -249,6 +282,10 @@ function one(){
   }
 } 
 
+function zero(){
+  setInput((inp)=>inp+'0')
+}
+
 
 
 function three(){
@@ -262,11 +299,17 @@ function three(){
 
 function cut(){
   setInput((inp)=>(inp.slice(0,-1)))
+  if(!input){
+    setanswer(" ")
+  }
 }
 
 function clr(){
   setInput(" ")
+  setanswer(" ")
 }
+
+
 
 
 
@@ -331,12 +374,114 @@ function sin(){
    }
 }
 
+function cos(){
+   if(shift===1){
+    setInput(inp=>inp+"arccos(")
+   }
+   else{
+      setInput(inp=>inp+"cos(")
+   }
+}
+
+
+
+
+function tan(){
+   if(shift===1){
+    setInput(inp=>inp+"arctan(")
+   }
+   else{
+      setInput(inp=>inp+"tan(")
+   }
+}
+
+function integration(){
+  if(shift===1){
+    setInput(inp=>inp+ "d/dx(f(x),x)->(")
+  }else
+  {
+        setInput(inp => inp + "∫(u,l,f(x))dx-> (");
+
+  }
+}
+
+function fraction()
+{
+  if(shift===1){
+    setInput(inp=>inp+ "x y/z->(")
+  }else
+  {
+        setInput(inp => inp + "x/y ->(");
+
+  }
+}
+
+function dms() {
+  // If there's a calculated answer, toggle between decimal and DMS format
+  if (answer) {
+    if (typeof answer === 'number') {
+      // Convert decimal to DMS
+      const decimal = answer;
+      const degrees = Math.floor(decimal);
+      const minutesDecimal = (decimal - degrees) * 60;
+      const minutes = Math.floor(minutesDecimal);
+      const seconds = Math.round((minutesDecimal - minutes) * 60);
+
+      function dms(){
+    setInput(inp=>inp+"°")
+  }
+      
+      // Store the original decimal value and set the DMS format
+      setOriginalDecimal(answer);
+      setanswer(`${degrees}°${minutes}'${seconds}"`);
+      setDmsMode(true);
+    } else if (dmsMode && originalDecimal !== null) {
+      // If already in DMS mode, revert to decimal
+      setanswer(originalDecimal);
+      setDmsMode(false);
+    }
+  } else if (input) {
+    // Original functionality - append degree symbol to input
+    setInput(inp => inp + "°");
+  }
+}
+function inverse(){
+  if(shift===1){
+    setInput(inp=>inp+"!")
+  }
+  else{
+    setInput(inp=>inp+"x⁻¹->(")
+  }
+}
+
+function log (){
+   setInput(inp=>inp+"Log(")
+}
+
+function nln(){
+  setInput(inp=>inp+"ln(")
+}
+
 function evaluate(){
   if(input){
     console.log(evaluateExpression(input));
-    setanswer((evalu)=>evalu+evaluateExpression(input))
+    setanswer(evaluateExpression(input,type))
   
   }
+}
+
+
+function root(){
+  setInput(inp=>inp+'√x->(')
+
+}
+
+function power(){
+  setInput(inp=>inp+"^2")
+}
+
+function doublepower(){
+  setInput(inp=>inp+"xʸ->(")
 }
 
    return (
@@ -389,13 +534,13 @@ function evaluate(){
             </div>
             <div>
               <p className="label">d/dx</p>
-              <button className="calcBtn">∫<sup>x</sup><sub>y</sub></button>
+              <button className="calcBtn" onClick={()=>integration()}>∫<sup>x</sup><sub>y</sub></button>
             </div>
             <button className="arrowBtn1"><img src={up} alt="Up Arrow" className="icon" onClick={()=>cursor('up')} /></button>
             <button className="arrowBtn1"><img src={down} alt="Down Arrow" className="icon" onClick={()=>cursor('down')} /></button>
             <div>
               <p className="label">x!</p>
-              <button className="calcBtn">x⁻¹</button>
+              <button className="calcBtn" onClick={()=>inverse()}>x⁻¹</button>
             </div>
             <div>
               <p className="label">∑</p>
@@ -404,28 +549,28 @@ function evaluate(){
 
             {/* Row 3 */}
             <div>
-              <p className="label">x y/z ÷R</p>
-              <button className="calcBtn">x/y</button>
+              <p className="label">x y/z </p>
+              <button className="calcBtn" onClick={()=>fraction()}>x/y</button>
             </div>
             <div>
               <p className="label">x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mod</p>
-              <button className="calcBtn">√x</button>
+              <button className="calcBtn" onClick={()=>root()}>√x</button>
             </div>
             <div>
               <p className="label">x̅</p>
-              <button className="calcBtn">x²</button>
+              <button className="calcBtn" onClick={()=>power()}>x²</button>
             </div>
             <div>
               <p className="label">ⁿ√y</p>
-              <button className="calcBtn">xʸ</button>
+              <button className="calcBtn" onClick={()=>doublepower()}>xʸ</button>
             </div>
             <div>
               <p className="label">10ˣ</p>
-              <button className="calcBtn">Log</button>
+              <button className="calcBtn" onClick={()=>log()}>Log</button>
             </div>
             <div>
               <p className="label">eˣ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;t</p>
-              <button className="calcBtn">Ln</button>
+              <button className="calcBtn" onClick={()=>nln()}>Ln</button>
             </div>
 
             
@@ -435,7 +580,7 @@ function evaluate(){
             </div>
             <div>
               <p className="label3">FACT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;b</p>
-              <button className="calcBtn">° ' "</button>
+              <button className="calcBtn" onClick={()=>dms()}>° ' "</button>
             </div>
             <div>
               <p className="label">| x |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;c</p>
@@ -447,11 +592,11 @@ function evaluate(){
             </div>
             <div>
               <p className="label">cos⁻¹&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;d</p>
-              <button className="calcBtn">cos</button>
+              <button className="calcBtn"onClick={()=>cos()}>cos</button>
             </div>
             <div>
               <p className="label">tan⁻¹&nbsp;&nbsp;&nbsp;&nbsp;f</p>
-              <button className="calcBtn">tan</button>
+              <button className="calcBtn" onClick={()=>tan()}>tan</button>
             </div>
 
           
@@ -465,11 +610,11 @@ function evaluate(){
             </div>
             <div>
               <p className="label">%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cot⁻¹</p>
-              <button className="calcBtn">(</button>
+              <button className="calcBtn"onClick={openbrack}>(</button>
             </div>
             <div>
               <p className="label">,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x</p>
-              <button className="calcBtn">)</button>
+              <button className="calcBtn"onClick={closebracl}>)</button>
             </div>
             <div>
               <p className="label">x/y → y/z</p>
@@ -498,7 +643,7 @@ function evaluate(){
             </div>
             <div>
               <p className="label1">Limit</p>
-              <button className="numberBtn">9</button>
+              <button className="numberBtn"onClick={nine}>9</button>
             </div>
             <div>
               <p className="label1">&nbsp;</p>
@@ -521,17 +666,17 @@ function evaluate(){
             </div>
             <div>
               <p className="label1">FNC HELP</p>
-              <button className="numberBtn">6</button>
+              <button className="numberBtn"onClick={six}>6</button>
             </div>
             <div>
             <p className="label1">nCr&nbsp;&nbsp;&nbsp;GCD</p>
 
-            <button className="operatorBtn">X</button>
+            <button className="operatorBtn"onClick={mul}>X</button>
             </div>
             
             <div>
             <p className="label1">nPr&nbsp;&nbsp;&nbsp;LCM</p>
-            <button className="operatorBtn">÷</button>
+            <button className="operatorBtn"onClick={div}>÷</button>
             </div>
           
 
@@ -550,18 +695,18 @@ function evaluate(){
             </div>
             <div>
               <p className="label1">Pol Cell</p>
-              <button className="operatorBtn">+</button>
+              <button className="operatorBtn"onClick={plus}>+</button>
             </div>
             
             <div>
               <p className="label1">Rec Floor</p>
-              <button className="operatorBtn">-</button>
+              <button className="operatorBtn"onClick={mins}>-</button>
             </div>
 
             
             <div>
               <p className="label1">copy paste </p>
-              <button className="numberBtn">0</button>
+              <button className="numberBtn"onClick={zero}>0</button>
             </div>
             <div>
               <p className="label1">&nbsp;Ran#RandInt</p>
@@ -608,15 +753,16 @@ function evaluate(){
       )}
       
 
-    {showHypeMenu && (
-        <div className="modeMenuContainer">
-          <HypeMenu
-            showHypeMenu={showHypeMenu}
-            setShowHypeMenu={setshowHypeMenu}
-            setSelectedMode={setSelectedMode} 
-          />
-        </div>
-      )}
+{showHypeMenu && (
+  <div className="modeMenuContainer">
+    <HypeMenu
+      showHypeMenu={showHypeMenu}
+      setShowHypeMenu={setshowHypeMenu}
+      setInput={setInput}  // ✅ pass input setter directly
+    />
+  </div>
+)}
+
 
 {consmenu && (
         <div className="modeMenuContainer">
