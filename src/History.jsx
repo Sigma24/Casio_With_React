@@ -51,8 +51,3 @@ export default HistoryManager;
 
 
 
-const expression = "5 * 3";
-const result = "15";
-
-// Save it
-HistoryManager.addHistory(${expression} =${result});

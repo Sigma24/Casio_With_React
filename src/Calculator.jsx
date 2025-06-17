@@ -17,7 +17,8 @@
   import VectorShift from "./vector";
   import { useRef } from "react";
 import { evaluateExpression } from "./eval";
-
+import HistoryManager from "./History";
+import HistoryList from "./history_UI";
 
   function Calculator() {
     
@@ -45,6 +46,8 @@ import { evaluateExpression } from "./eval";
     const[hyp,sethyp]=useState("")
     const [dmsMode, setDmsMode] = useState(false);
 const [originalDecimal, setOriginalDecimal] = useState(null);
+  const [showHistory, setShowHistory] = useState(false);
+  const [historyItems, setHistoryItems] = useState([]);
 
 
 
@@ -74,6 +77,14 @@ switch(selectedMode){
     break;          
       
 } 
+
+
+  useEffect(() => {
+    if (showHistory) {
+      const stored = HistoryManager.getAllHistory();
+      setHistoryItems(stored);
+    }
+  }, [showHistory]);
 
 
 function plus(){
@@ -417,9 +428,8 @@ function fraction()
 }
 
 function dms() {
-  // If there's a calculated answer, toggle between decimal and DMS format
   if (answer) {
-    if (typeof answer === 'number') {
+    if (typeof answer === 'number' && !dmsMode) {
       // Convert decimal to DMS
       const decimal = answer;
       const degrees = Math.floor(decimal);
@@ -427,24 +437,22 @@ function dms() {
       const minutes = Math.floor(minutesDecimal);
       const seconds = Math.round((minutesDecimal - minutes) * 60);
 
-      function dms(){
-    setInput(inp=>inp+"°")
-  }
-      
-      // Store the original decimal value and set the DMS format
       setOriginalDecimal(answer);
       setanswer(`${degrees}°${minutes}'${seconds}"`);
       setDmsMode(true);
+
     } else if (dmsMode && originalDecimal !== null) {
-      // If already in DMS mode, revert to decimal
+      // Revert back to decimal
       setanswer(originalDecimal);
       setDmsMode(false);
     }
-  } else if (input) {
-    // Original functionality - append degree symbol to input
+
+  } else {
+    // No answer exists, so just append the degree symbol to input
     setInput(inp => inp + "°");
   }
 }
+
 function inverse(){
   if(shift===1){
     setInput(inp=>inp+"!")
@@ -463,11 +471,25 @@ function nln(){
 }
 
 function evaluate(){
+  if (shift===1){
+   
+     setShowHistory(true);
+      return;
+      
+    
+  }
+  setshift(0)
+  
   if(input){
-    console.log(evaluateExpression(input));
-    setanswer(evaluateExpression(input,type))
+   
+      const result = evaluateExpression(input,type); 
+      setanswer(result);
+
+      const expressionWithResult = `${input} = ${result}`;
+      HistoryManager.addHistory(expressionWithResult);
   
   }
+  
 }
 
 
@@ -484,7 +506,18 @@ function doublepower(){
   setInput(inp=>inp+"xʸ->(")
 }
 
+  function handleDeleteHistoryItem(index) {
+    HistoryManager.deleteHistoryItem(index);
+    const updated = HistoryManager.getAllHistory();
+    setHistoryItems(updated);
+  }
+
+
+
+
+
    return (
+    
       <div className="calculatorContainer">
         <div className="mainView">
    
@@ -728,6 +761,36 @@ function doublepower(){
             </div>
           </div>
         </div>
+        
+
+
+    {
+      showHistory&&(
+          <HistoryList
+          historyItems={historyItems}
+          onDelete={handleDeleteHistoryItem}
+          onBack={() => setShowHistory(false)}
+        />
+      )
+    }
+
+{/* {
+        showHistory && (
+        <div className="modeMenuContainer">
+          <Historymenu
+            showMenu={showMenu}
+            setShowMenu={setShowMenu}
+            setSelectedMode={setSelectedMode} 
+            shift={shift}
+            reset={resetshift}
+          />
+        </div>
+      )} */}
+
+
+
+
+
         {showMenu && (
         <div className="modeMenuContainer">
           <ModeMenu
