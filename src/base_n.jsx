@@ -2,13 +2,18 @@
 import React from "react";
 import "./base_n.css";
 
-const BaseShift = ({ showBaseMenu, setShowBaseMenu, shift, resetshift }) => {
+const BaseShift = ({ showBaseMenu, setShowBaseMenu, shift, resetshift,setInput }) => {
   
-  const conversions = ["AND","OR","NOT","NEG","XOR","XNOR"];
+  const conversions = ["and","or","nor","neg","xor","xnor"];
 
   const handleConversionClick = (conversion) => {
     console.log("Selected Conversion:", conversion);
     setShowBaseMenu(false);
+    if(conversion=="not"|| conversion=="neg"){
+      setInput(inp=>inp+conversion+"(")
+    }else{
+    setInput(inp=>inp+conversion)
+    }
     resetshift();
   };
 

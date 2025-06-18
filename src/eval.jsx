@@ -6,6 +6,7 @@ import {
 } from './trigono';
 import { polarToRectangular ,rectangularToPolar,complexConjugate,complexArgument} from './complexlogic';
 import { convertValueofConversion } from './conv';
+import { logicGate } from './basenlogic';
 
 function formatFunctionExpr(expr) {
   const superscripts = {
@@ -177,6 +178,38 @@ function evaluateArithmetic(expr, mode) {
 export function evaluateExpression(expr, mode = 'RAD') {
   try {
     expr = expr.trim().replace(/\s+/g, '')
+
+
+const binaryGates = ["and", "or", "xor", "xnor"];
+    for (let gate of binaryGates) {
+      const pattern = new RegExp(`^(\\d)${gate}(\\d)$`, "i");
+      const match = expr.match(pattern);
+      if (match) {
+        const input1 = parseInt(match[1]);
+        const input2 = parseInt(match[2]);
+        return logicGate(gate, input1, input2);
+      }
+    }
+
+    // --- ✅ 2. Logic GATE (Unary: neg, not)
+    const unaryGates = ["neg", "not"];
+    for (let gate of unaryGates) {
+      const pattern = new RegExp(`^${gate}\\(?(-?\\d+)\\)?$`, "i");
+      const match = expr.match(pattern);
+      if (match) {
+        const input1 = parseFloat(match[1]);
+        return logicGate(gate, input1);
+      }
+    }
+
+
+
+
+
+
+
+
+
 // 1. Handle "conj("
 if (expr.startsWith("conj")) {
   const inner = expr.replace(/^conj\(?/, '').replace(/\)?$/, '');

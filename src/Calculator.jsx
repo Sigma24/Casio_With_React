@@ -735,7 +735,7 @@ function Polar (){
               <button className="numberBtn" onClick={two}>2</button>
             </div>
             <div>
-              <p className="label1">DISTR</p>
+              <p className="label1">BASE_N</p>
               <button className="numberBtn" onClick={three}>3</button>
             </div>
             <div>
@@ -898,6 +898,7 @@ function Polar (){
             setSelectedMode={setSelectedMode}
         
             resetshift={resetshift} 
+            setInput={setInput}
           />
         </div>
       )}
