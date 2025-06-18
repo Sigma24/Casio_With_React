@@ -4,6 +4,7 @@ import {
   sinh, cosh, tanh,
   arcsinh, arccosh, arctanh
 } from './trigono';
+import { polarToRectangular ,rectangularToPolar,complexConjugate,complexArgument} from './complexlogic';
 
 function formatFunctionExpr(expr) {
   const superscripts = {
@@ -174,7 +175,45 @@ function evaluateArithmetic(expr, mode) {
 // ✅ Final Exported Evaluator
 export function evaluateExpression(expr, mode = 'RAD') {
   try {
-    expr = expr.trim();
+    expr = expr.trim().replace(/\s+/g, '')
+// 1. Handle "conj("
+if (expr.startsWith("conj")) {
+  const inner = expr.replace(/^conj\(?/, '').replace(/\)?$/, '');
+  if (!inner) throw new Error("Invalid conj syntax");
+  return complexConjugate(inner);
+}
+
+// 2. Handle "arg("
+    if (expr.startsWith('arg(')) {
+      const input = expr.slice(4).replace(')', '').trim();
+      if (!input) throw new Error("Invalid input to arg()");
+      return complexArgument(input, mode);
+    }
+
+
+// 3. Handle "a+bi⯈r∠θ"
+if (expr.includes("⯈r∠θ")) {
+  const [realPart] = expr.split("⯈r∠θ");
+  return rectangularToPolar(realPart, mode);
+}
+
+// 4. Handle "r∠θ⯈a+bi"
+if (expr.includes("⯈a+bi")) {
+  const match = expr.match(/^([+-]?\d*\.?\d+)\∠([+-]?\d*\.?\d+)\⯈a\+bi$/);
+  if (!match) throw new Error("Invalid polar to rectangular format");
+  const r = parseFloat(match[1]);
+  const theta = parseFloat(match[2]);
+  return polarToRectangular(r, theta, mode);
+}
+
+// 5. Handle just "r∠θ"
+if (expr.includes("∠") && !expr.includes("⯈")) {
+  const match = expr.match(/^([+-]?\d*\.?\d+)\∠([+-]?\d*\.?\d+)$/);
+  if (!match) throw new Error("Invalid polar format");
+  const r = parseFloat(match[1]);
+  const theta = parseFloat(match[2]);
+  return polarToRectangular(r, theta, mode);
+}
 
     if (/^-?\d+(\.\d+)?$/.test(expr)) {
       return parseFloat(expr);

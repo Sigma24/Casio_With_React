@@ -1,4 +1,4 @@
-export default function ComplexConverter() {
+
   const PI = 3.141592653589793;
 
   function degreesToRadians(degrees) {
@@ -41,7 +41,7 @@ export default function ComplexConverter() {
     return value % 1 === 0 ? value.toString() : value.toFixed(4).replace(/\.0000$/, '');
   }
 
-  function polarToRectangular(r, theta) {
+ export function polarToRectangular(r, theta) {
     const thetaRad = degreesToRadians(theta);
     const a = r * calculateCos(thetaRad);
     const b = r * calculateSin(thetaRad);
@@ -87,7 +87,7 @@ export default function ComplexConverter() {
     return rad * 200 / PI;
   }
 
-  function complexArgument(input, mode) {
+  export function complexArgument(input, mode) {
     const [real, imag] = parseComplex(input);
     const angleRad = calculateAtan2(imag, real);
     if (mode.toLowerCase() === 'degree') return formatNumber(radToDeg(angleRad));
@@ -103,33 +103,63 @@ export default function ComplexConverter() {
     return guess;
   }
 
-  function rectangularToPolar(input) {
+ export function rectangularToPolar(input) {
     const [real, imag] = parseComplex(input);
     const r = sqrtApprox(real * real + imag * imag);
     const theta = calculateAtan2(imag, real) * 180 / PI;
     return `${formatNumber(r)}∠${formatNumber(theta)}°`;
   }
 
-  function complexConjugate(input) {
-    if (input.includes('+')) {
-      const parts = input.split('+');
-      return `${parts[0]}-${parts[1].replace('i', '')}i`;
-    }
-    if (input.includes('-')) {
-      const parts = input.split('-');
-      if (input.startsWith('-')) {
-        return `-${parts[1]}+${parts[2].replace('i', '')}i`;
-      }
-      return `${parts[0]}+${parts[1].replace('i', '')}i`;
-    }
+export function complexConjugate(input) {
+  input = input.trim().replace(/\s+/g, '');
+
+  // Handle pure imaginary like "5i", "-5i", "+5i"
+  if (/^[+-]?\d*\.?\d*i$/.test(input)) {
+    const num = parseFloat(input.replace('i', '')) || (input.startsWith('-') ? -1 : 1);
+    return (num * -1) + 'i';
+  }
+
+  // Handle pure real like "5"
+  if (/^[+-]?\d*\.?\d+$/.test(input)) {
     return input;
   }
 
-  // Example usage (for debugging/testing in browser console):
-  console.log(polarToRectangular(5, 45));
-  console.log(rectangularToPolar("3+4i"));
-  console.log(complexArgument("3+4i", "degree"));
-  console.log(complexConjugate("3+4i"));
+  // Handle full complex form like "3+4i" or "-3-4i"
+  const match = input.match(/^([+-]?\d*\.?\d+)([+-])(\d*\.?\d+)i$/);
+  if (!match) throw new Error("Invalid complex format for conjugate");
 
-  return null; // No UI yet
+  const real = match[1];
+  const operator = match[2];
+  const imag = match[3];
+
+  const newOp = operator === '+' ? '-' : '+';
+  return `${real}${newOp}${imag}i`;
 }
+
+// export function complexConjugate(value) {
+//   if (typeof value === 'number') {
+//     return value; // Pure real number
+//   }
+
+//   if (typeof value === 'string') value = value.replace(/\s+/g, "");
+
+//   // Handle pure imaginary: e.g. "-5i"
+//   if (/^-?\d*\.?\d*i$/.test(value)) {
+//     const imag = parseFloat(value.replace('i', '')) || (value.startsWith('-') ? -1 : 1);
+//     return (imag * -1) + 'i';
+//   }
+
+//   const parsed = parseComplex(value);
+//   if (!parsed) throw new Error("Invalid complex number for conjugate");
+//   return {
+//     real: parsed.real,
+//     imag: -parsed.imag
+//   };
+// }
+
+
+
+
+
+
+

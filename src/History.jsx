@@ -1,3 +1,6 @@
+
+import "./shift.css";
+
 const HISTORY_KEY = 'calculator_history';
 const MAX_HISTORY_ITEMS = 15;
 
@@ -5,14 +8,14 @@ const HistoryManager = {
   addHistory: (expressionWithResult) => {
     let history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
 
-    // Add new item to top
+ 
     history.unshift({
       expressionWithResult,
       date: getCurrentDate(),
       time: getCurrentTime(),
     });
 
-    // Limit to 15 items
+
     if (history.length > MAX_HISTORY_ITEMS) {
       history = history.slice(0, MAX_HISTORY_ITEMS);
     }
@@ -36,7 +39,7 @@ const HistoryManager = {
 };
 
 function getCurrentDate() {
-  return new Date().toLocaleDateString('en-GB'); // DD/MM/YYYY
+  return new Date().toLocaleDateString('en-GB'); 
 }
 
 function getCurrentTime() {
@@ -47,7 +50,46 @@ function getCurrentTime() {
   }); // HH:mm
 }
 
+
+
+
 export default HistoryManager;
 
 
 
+// import React, { useEffect, useState } from "react";
+// import HistoryManager from "./HistoryManager"; // assuming it's in a separate file
+
+// const HistoryView = ({ showHistory }) => {
+//   const [historyItems, setHistoryItems] = useState([]);
+
+//   useEffect(() => {
+//     if (showHistory) {
+//       const stored = HistoryManager.getAllHistory();
+//       setHistoryItems(stored);
+//     }
+//   }, [showHistory]);
+
+  
+
+//   return (
+//     <>
+//       {showHistory && (
+//         <div className="history-view">
+//           <h3>History</h3>
+//           <ul>
+//             {historyItems.map((item, index) => (
+//               <li key={index}>
+//                 <strong>{item.expressionWithResult}</strong>
+//                 <br />
+//                 <small>{item.date} {item.time}</small>
+//               </li>
+//             ))}
+//           </ul>
+//         </div>
+//       )}
+//     </>
+//   );
+// };
+
+// export default HistoryView;

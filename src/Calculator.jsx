@@ -512,6 +512,18 @@ function doublepower(){
     setHistoryItems(updated);
   }
 
+function Polar (){
+  if (selectedMode=="CMPLX" && shift===1){
+    setInput(inp=>inp+"∠")
+    setshift(0)
+
+  }
+  else{
+  
+  setInput(inp=>inp+"-")
+  }
+}  
+
 
 
 
@@ -609,7 +621,7 @@ function doublepower(){
             
             <div>
               <p className="label">∠&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a</p>
-              <button className="calcBtn">(-)</button>
+              <button className="calcBtn" onClick={()=>Polar()}>(-)</button>
             </div>
             <div>
               <p className="label3">FACT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;b</p>
@@ -883,7 +895,7 @@ function doublepower(){
             showBaseMenu={base}
             setShowBaseMenu={setbase}
             setSelectedMode={setSelectedMode}
-            shift={shift}
+        
             resetshift={resetshift} 
           />
         </div>
@@ -897,6 +909,8 @@ function doublepower(){
             setSelectedMode={setSelectedMode}
             shift={shift}
             resetshift={resetshift} 
+            setInput={setInput}
+
           />
         </div>
       )}

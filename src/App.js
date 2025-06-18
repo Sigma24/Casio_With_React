@@ -1,13 +1,12 @@
 import logo from './logo.svg';
 import './App.css';
-import { useState } from 'react';
+import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import Calculator from './Calculator';
+import ShowHistory from './ShowHistory';
 
-function App() {
-  const[screen,setscreen]=useState(false)
-  if(screen){
-    return <Calculator/>
-  }
+function HomeScreen() {
+  const navigate = useNavigate();
+
   return (
     <div className="App">
       <header className="App-header">
@@ -23,10 +22,21 @@ function App() {
         >
           Learn React
         </a>
-        <button className='hell' onClick={()=>setscreen(true)}>Click Karo </button>
-        
+        <button className='hell' onClick={() => navigate('/calculator')}>Click Karo</button>
       </header>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<HomeScreen />} />
+        <Route path="/calculator" element={<Calculator />} />
+        <Route path="/history" element={<ShowHistory />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

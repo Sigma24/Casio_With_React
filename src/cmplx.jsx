@@ -2,19 +2,23 @@
 import React from "react";
 import "./cmplx.css";
 
-const CmplxShift = ({ showCmplxMenu, setShowCmplxMenu, shift, resetshift }) => {
+const CmplxShift = ({ showCmplxMenu, setShowCmplxMenu, resetshift,setInput }) => {
   
   const conversions =[
-    "1: Re( )",         
-    "2: Im( )",         
-    "3: r∠θ",          
-    "4: Conjg",        
-    "5: Abs( )",
-    "6: Arg( )",     
+           
+    "⯈a+bi",
+    "⯈r∠θ",          
+    "conj",
+    "arg"
+     
 ];;
 
   const handleConversionClick = (conversion) => {
-    console.log("Selected Conversion:", conversion);
+    if(conversion=="conj" || conversion=="arg"){
+      setInput(inp=>inp+conversion+"(")
+    }else{
+    setInput(inp=>inp+conversion)
+    }
     setShowCmplxMenu(false);
     resetshift();
   };
@@ -26,7 +30,7 @@ const CmplxShift = ({ showCmplxMenu, setShowCmplxMenu, shift, resetshift }) => {
           <a href="#" className="cancel" onClick={() => setShowCmplxMenu(false)}>
             Cancel
           </a>
-          <p className="menu-title">SELECT CONVERSION</p>
+          <p className="menu-title">SELECT Complex Operation</p>
           <ul className="menu-list">
             {conversions.map((conversion, index) => (
               <li key={index} className="menu-item" onClick={() => handleConversionClick(conversion)}>

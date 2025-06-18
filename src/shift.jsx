@@ -2,7 +2,7 @@ import React from "react";
 import "./shift.css";
 
 const ShiftMenu = ({ showShiftMenu, setShowShiftMenu, setSelectedMode,shift,resetshift }) => {
-  const modes = [" MTHIO", "LINEIO", "DEG", "RAD", "GRAD", "FIX", "SCI","NORM"];
+  const modes = [" MTHIO", "LINEIO", "DEG", "RAD", "GRAD", "FIX", "SCI","NORM",];
 
   const handleModeClick = (mode) => {
     setSelectedMode(mode); 
