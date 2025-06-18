@@ -860,6 +860,7 @@ function Polar (){
             setSelectedMode={setSelectedMode}
             shift={shift}
             resetshift={resetshift} 
+            setInput={setInput}
           />
         </div>
       )}

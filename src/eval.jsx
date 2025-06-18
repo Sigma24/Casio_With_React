@@ -5,6 +5,7 @@ import {
   arcsinh, arccosh, arctanh
 } from './trigono';
 import { polarToRectangular ,rectangularToPolar,complexConjugate,complexArgument} from './complexlogic';
+import { convertValueofConversion } from './conv';
 
 function formatFunctionExpr(expr) {
   const superscripts = {
@@ -234,6 +235,16 @@ if (expr.includes("∠") && !expr.includes("⯈")) {
       if (isNaN(xValue)) throw new Error("Invalid x value");
       return numericalDerivative(formatFunctionExpr(rawFuncStr), xValue);
     }
+
+
+    const unitConvPattern = /^(\d*\.?\d+)\s*([a-zA-Z]+)\s*►\s*([a-zA-Z\s().°°]+)$/;
+    const matchConv = expr.match(unitConvPattern);
+    if (matchConv) {
+      const value = matchConv[1];
+      const fromTo = `${matchConv[2]} ► ${matchConv[3]}`.replace(/\s+/g, ' ').trim();
+      return convertValueofConversion(value, fromTo);
+    }
+
 
     return evaluateArithmetic(expr, mode);
   } catch (err) {
