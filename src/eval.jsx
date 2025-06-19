@@ -7,6 +7,7 @@ import {
 import { polarToRectangular ,rectangularToPolar,complexConjugate,complexArgument} from './complexlogic';
 import { convertValueofConversion } from './conv';
 import { logicGate } from './basenlogic';
+import { constantsMap } from './const';
 
 function formatFunctionExpr(expr) {
   const superscripts = {
@@ -174,13 +175,83 @@ function evaluateArithmetic(expr, mode) {
   return result;
 }
 
-// ✅ Final Exported Evaluator
+
+
 export function evaluateExpression(expr, mode = 'RAD') {
   try {
-    expr = expr.trim().replace(/\s+/g, '')
+    if (!expr || typeof expr !== 'string') throw new Error("Empty input");
 
+    // 1. Normalize input
+    expr = expr.trim()
+      .replace(/\s+/g, '')
+      .replace(/×|x/g, '*')
+      .replace(/÷/g, '/');
 
-const binaryGates = ["and", "or", "xor", "xnor"];
+    // 2. Constants Map
+    const constantsMap = new Map([
+      ["c", 2.99792458e8],
+      ["μ₀", 4 * Math.PI * 1e-7],
+      ["ε₀", 8.854187817e-12],
+      ["G", 6.67430e-11],
+      ["h", 6.62607015e-34],
+      ["ħ", 1.054571817e-34],
+      ["mₚ", 2.176434e-8],
+      ["e", 1.602176634e-19],
+      ["kₑ", 8.9875517923e9],
+      ["Nₐ", 6.02214076e23],
+      ["mp", 1.67262192369e-27],
+      ["mn", 1.67492749804e-27],
+      ["me", 9.1093837015e-31],
+      ["mu", 1.883531627e-28],
+      ["a₀", 5.29177210903e-11],
+      ["u", 1.6605390666e-27],
+      ["re", 2.8179403262e-15],
+      ["α", 7.2973525693e-3],
+      ["R∞", 1.0973731568160e7],
+      ["F", 96485.33289],
+      ["μB", 9.27400999457e-24],
+      ["μN", 5.0507837461e-27],
+      ["Φ₀", 2.067833848e-15],
+      ["G₀", 7.748091729e-5],
+      ["KJ", 4.835978484e14],
+      ["RK", 25812.80745],
+      ["k", 1.380649e-23],
+      ["σ", 5.670374419e-8],
+      ["R", 8.314462618],
+      ["Vm", 2.2413996e-2],
+      ["g", 9.80665],
+      ["atm", 101325],
+      ["T₀", 273.15],
+      ["eV", 1.602176634e-19],
+      ["b", 2.897771955e-3],
+      ["NA·h", 3.990312714e-10],
+      ["c₁", 3.741771852e-16],
+      ["c₂", 1.438776877e-2]
+    ]);
+
+    // 3. Replace constants safely
+    const replaceConstantsInExpr = (expression) => {
+      const sortedSymbols = Array.from(constantsMap.keys()).sort((a, b) => b.length - a.length);
+      for (let symbol of sortedSymbols) {
+        const value = constantsMap.get(symbol);
+        if (symbol === 'e') {
+          // Replace e only when it's not part of scientific notation
+          expression = expression.replace(/([^0-9a-zA-Z_])e([^0-9])/g, `$1(${value})$2`);
+          expression = expression.replace(/^e([^0-9])/g, `(${value})$1`);
+          expression = expression.replace(/([^0-9a-zA-Z_])e$/g, `$1(${value})`);
+        } else {
+          const escaped = symbol.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+          const regex = new RegExp(`\\b${escaped}\\b`, 'g');
+          expression = expression.replace(regex, `(${value})`);
+        }
+      }
+      return expression;
+    };
+
+    expr = replaceConstantsInExpr(expr);
+
+    // 4. Logic Gates (Binary)
+    const binaryGates = ["and", "or", "xor", "xnor"];
     for (let gate of binaryGates) {
       const pattern = new RegExp(`^(\\d)${gate}(\\d)$`, "i");
       const match = expr.match(pattern);
@@ -191,7 +262,7 @@ const binaryGates = ["and", "or", "xor", "xnor"];
       }
     }
 
-    // --- ✅ 2. Logic GATE (Unary: neg, not)
+    // 5. Logic Gates (Unary)
     const unaryGates = ["neg", "not"];
     for (let gate of unaryGates) {
       const pattern = new RegExp(`^${gate}\\(?(-?\\d+)\\)?$`, "i");
@@ -202,58 +273,48 @@ const binaryGates = ["and", "or", "xor", "xnor"];
       }
     }
 
+    // 6. Complex Conjugate
+    if (expr.startsWith("conj")) {
+      const inner = expr.replace(/^conj\(?/, '').replace(/\)?$/, '');
+      if (!inner) throw new Error("Invalid conj syntax");
+      return complexConjugate(inner);
+    }
 
-
-
-
-
-
-
-
-// 1. Handle "conj("
-if (expr.startsWith("conj")) {
-  const inner = expr.replace(/^conj\(?/, '').replace(/\)?$/, '');
-  if (!inner) throw new Error("Invalid conj syntax");
-  return complexConjugate(inner);
-}
-
-// 2. Handle "arg("
+    // 7. Argument
     if (expr.startsWith('arg(')) {
       const input = expr.slice(4).replace(')', '').trim();
       if (!input) throw new Error("Invalid input to arg()");
       return complexArgument(input, mode);
     }
 
+    // 8. Polar Conversion
+    if (expr.includes("⯈r∠θ")) {
+      const [realPart] = expr.split("⯈r∠θ");
+      return rectangularToPolar(realPart, mode);
+    }
 
-// 3. Handle "a+bi⯈r∠θ"
-if (expr.includes("⯈r∠θ")) {
-  const [realPart] = expr.split("⯈r∠θ");
-  return rectangularToPolar(realPart, mode);
-}
+    if (expr.includes("⯈a+bi")) {
+      const match = expr.match(/^([+-]?\d*\.?\d+)\∠([+-]?\d*\.?\d+)\⯈a\+bi$/);
+      if (!match) throw new Error("Invalid polar to rectangular format");
+      const r = parseFloat(match[1]);
+      const theta = parseFloat(match[2]);
+      return polarToRectangular(r, theta, mode);
+    }
 
-// 4. Handle "r∠θ⯈a+bi"
-if (expr.includes("⯈a+bi")) {
-  const match = expr.match(/^([+-]?\d*\.?\d+)\∠([+-]?\d*\.?\d+)\⯈a\+bi$/);
-  if (!match) throw new Error("Invalid polar to rectangular format");
-  const r = parseFloat(match[1]);
-  const theta = parseFloat(match[2]);
-  return polarToRectangular(r, theta, mode);
-}
+    if (expr.includes("∠") && !expr.includes("⯈")) {
+      const match = expr.match(/^([+-]?\d*\.?\d+)\∠([+-]?\d*\.?\d+)$/);
+      if (!match) throw new Error("Invalid polar format");
+      const r = parseFloat(match[1]);
+      const theta = parseFloat(match[2]);
+      return polarToRectangular(r, theta, mode);
+    }
 
-// 5. Handle just "r∠θ"
-if (expr.includes("∠") && !expr.includes("⯈")) {
-  const match = expr.match(/^([+-]?\d*\.?\d+)\∠([+-]?\d*\.?\d+)$/);
-  if (!match) throw new Error("Invalid polar format");
-  const r = parseFloat(match[1]);
-  const theta = parseFloat(match[2]);
-  return polarToRectangular(r, theta, mode);
-}
 
     if (/^-?\d+(\.\d+)?$/.test(expr)) {
       return parseFloat(expr);
     }
 
-    // Integration
+
     if (/^∫\s*\(u,l,f\(x\)\)\s*dx\s*->\s*\(([^,]+),([^,]+),([^)]+)\)/.test(expr)) {
       const match = expr.match(/^∫\s*\(u,l,f\(x\)\)\s*dx\s*->\s*\(([^,]+),([^,]+),([^)]+)\)/);
       const [lower, upper, rawFuncStr] = [parseFloat(match[1]), parseFloat(match[2]), match[3].trim()];
@@ -261,7 +322,7 @@ if (expr.includes("∠") && !expr.includes("⯈")) {
       return simpsonsRule(formatFunctionExpr(rawFuncStr), lower, upper);
     }
 
-    // Derivative
+
     if (/^d\/dx\s*\(f\(x\),x\)\s*->\s*\(([^,]+),([^)]+)\)/.test(expr)) {
       const match = expr.match(/^d\/dx\s*\(f\(x\),x\)\s*->\s*\(([^,]+),([^)]+)\)/);
       const [rawFuncStr, xValue] = [match[1].trim(), parseFloat(match[2])];
@@ -278,10 +339,15 @@ if (expr.includes("∠") && !expr.includes("⯈")) {
       return convertValueofConversion(value, fromTo);
     }
 
-
+   
     return evaluateArithmetic(expr, mode);
+
   } catch (err) {
     console.error("Evaluation error:", err.message);
     return "Error: " + err.message;
   }
 }
+
+
+
+

@@ -40,16 +40,34 @@
 
 /* Menu Items */
 .menu-item {
-    padding: 12px;
-    font-size: 18px;
-    border-bottom: 1px solid gray;
-    cursor: pointer;
-    transition: background 0.3s;
+  padding: 15px;
+  font-size: 16px;
+  border-bottom: 1px solid gray;
+  cursor: pointer;
+  transition: background 0.3s;
+  text-align: left;
 }
 
 .menu-item:hover {
-    background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
 }
+
+.const-name {
+  font-weight: bold;
+  font-size: 17px;
+}
+
+.const-symbol {
+  font-style: italic;
+  color: #ccc;
+  margin-top: 2px;
+}
+
+.const-value {
+  color: #a5eaff;
+  margin-top: 2px;
+}
+
 
 /* Cancel Button */
 .cancel {

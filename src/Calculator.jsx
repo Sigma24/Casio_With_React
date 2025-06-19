@@ -845,7 +845,7 @@ function Polar (){
             showConstMenu={consmenu}
             setShowConstMenu={setconsmenu}
             setSelectedMode={setSelectedMode}
-            shift={shift}
+            setInput={setInput}
             resetshift={resetshift} 
           />
         </div>
