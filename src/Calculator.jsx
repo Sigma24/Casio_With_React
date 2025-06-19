@@ -18,7 +18,8 @@
   import { useRef } from "react";
 import { evaluateExpression } from "./eval";
 import HistoryManager from "./History";
-import HistoryList from "./history_UI";
+import HistoryOverlay from "./history_UI"
+import EquationOverlay from "./Equationoverlay";
 
   function Calculator() {
     
@@ -48,6 +49,7 @@ import HistoryList from "./history_UI";
 const [originalDecimal, setOriginalDecimal] = useState(null);
   const [showHistory, setShowHistory] = useState(false);
   const [historyItems, setHistoryItems] = useState([]);
+    const [equationType, setEquationType] = useState(null);
 
 
 
@@ -126,6 +128,18 @@ function hell(){
       setInput(e.target.value);
       setCursorPosition(e.target.selectionStart);
   };
+
+    const handleEquationSelect = (type) => {
+    setEquationType(type); // Show overlay
+    setShowMenu(false);
+  };
+
+  const handleEquationEvaluate = (inputExpr, resultArr) => {
+  const resultStr = Array.isArray(resultArr) ? resultArr.join(', ') : resultArr;
+
+  setInput(inputExpr);     // Replace with how you update calculator input
+  setanswer(resultStr);    // Replace with how you update calculator output
+};
 
  
   const cursor = (direction) => {
@@ -474,6 +488,7 @@ function evaluate(){
   if (shift===1){
    
      setShowHistory(true);
+     setshift(0)
       return;
       
     
@@ -512,6 +527,18 @@ function doublepower(){
     setHistoryItems(updated);
   }
 
+
+function expe(){
+    if(shift===1){
+    setInput(inp=>inp+"π")
+    setshift(0)
+  }
+  if (alpha===1){
+    setInput(inp=>inp+"e")
+    setalpha(0)
+  }
+}
+
 function Polar (){
   if (selectedMode=="CMPLX" && shift===1){
     setInput(inp=>inp+"∠")
@@ -523,6 +550,21 @@ function Polar (){
   setInput(inp=>inp+"-")
   }
 }  
+
+
+function dot(){
+  if(shift===1){
+    setInput(inp=>inp+"Ran#")
+    setshift(0)
+  }
+  if (alpha===1){
+    setInput(inp=>inp+"RandInt(")
+    setalpha(0)
+  }
+}
+
+
+
 
 
 
@@ -755,11 +797,11 @@ function Polar (){
             </div>
             <div>
               <p className="label1">&nbsp;Ran#RandInt</p>
-              <button className="numberBtn">.</button>
+              <button className="numberBtn" onClick={()=>dot()}>.</button>
             </div>
             <div>
               <p className="label1">π&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;e</p>
-              <button className="numberBtn">Exp</button>
+              <button className="numberBtn" onClick={()=>expe()}>Exp</button>
             </div>
             <div>
             <p className="label1">Pre Ans</p>
@@ -776,28 +818,9 @@ function Polar (){
         
 
 
-    {
-      showHistory&&(
-          <HistoryList
-          historyItems={historyItems}
-          onDelete={handleDeleteHistoryItem}
-          onBack={() => setShowHistory(false)}
-        />
-      )
-    }
+   
 
-{/* {
-        showHistory && (
-        <div className="modeMenuContainer">
-          <Historymenu
-            showMenu={showMenu}
-            setShowMenu={setShowMenu}
-            setSelectedMode={setSelectedMode} 
-            shift={shift}
-            reset={resetshift}
-          />
-        </div>
-      )} */}
+
 
 
 
@@ -811,9 +834,26 @@ function Polar (){
             setSelectedMode={setSelectedMode} 
             shift={shift}
             reset={resetshift}
+            onEquationSelect={handleEquationSelect}
           />
+     
         </div>
       )}
+        <EquationOverlay
+        type={equationType}
+        visible={!!equationType}
+        onClose={() => setEquationType(null)}
+        onEvaluate={handleEquationEvaluate}
+      />
+
+      
+    
+    <HistoryOverlay
+  visible={showHistory}
+  onClose={() => setShowHistory(false)}
+  historyItems={historyItems}
+  onDelete={handleDeleteHistoryItem}
+/>
 
         {shiftMenu && (
         <div className="modeMenuContainer">
@@ -934,13 +974,7 @@ function Polar (){
   (
   <Graph onClose={()=>setgraph(false)}/>)
     }
-
-
-    
-
-
-    
-      </div>
+</div>
     );
   }
 

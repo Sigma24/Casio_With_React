@@ -250,6 +250,27 @@ export function evaluateExpression(expr, mode = 'RAD') {
 
     expr = replaceConstantsInExpr(expr);
 
+
+
+        // 9. Handle RandInt(min, max)
+    expr = expr.replace(/RandInt\((\d+),\s*(\d+)\)?/gi, (_, min, max) => {
+      const low = parseInt(min, 10);
+      const high = parseInt(max, 10);
+      return Math.floor(Math.random() * (high - low + 1)) + low;
+    });
+
+    // 10. Handle Ran# (Random Float)
+    expr = expr.replace(/Ran#/gi, () => {
+      return Math.random();
+    });
+
+    // 11. Replace π and e if not scientific notation
+    expr = expr.replace(/π/g, `(${Math.PI})`);
+    expr = expr.replace(/([^0-9a-zA-Z_])e([^0-9])/g, `$1(${Math.E})$2`);
+    expr = expr.replace(/^e([^0-9])/g, `(${Math.E})$1`);
+    expr = expr.replace(/([^0-9a-zA-Z_])e$/g, `$1(${Math.E})`);
+
+
     // 4. Logic Gates (Binary)
     const binaryGates = ["and", "or", "xor", "xnor"];
     for (let gate of binaryGates) {

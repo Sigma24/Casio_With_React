@@ -1,7 +1,7 @@
-export default function ComplexConverter() {
+
   const PI = 3.141592653589793;
 
-  function solveTwoVariable(inputs) {
+ export function solveTwoVariable(inputs) {
     const [a, b, c, d, e, f] = inputs;
     const det = a * e - b * d;
     if (det === 0) throw new Error("No unique solution");
@@ -10,7 +10,7 @@ export default function ComplexConverter() {
     return [x, y];
   }
 
-  function solveThreeVariable(inputs) {
+ export function solveThreeVariable(inputs) {
     const A = [
       [inputs[0], inputs[1], inputs[2], inputs[3]],
       [inputs[4], inputs[5], inputs[6], inputs[7]],
@@ -33,7 +33,7 @@ export default function ComplexConverter() {
     return [A[0][3], A[1][3], A[2][3]];
   }
 
-  function solveQuadratic(inputs) {
+ export function solveQuadratic(inputs) {
     const [a, b, c] = inputs;
     if (a === 0) throw new Error("Not a quadratic equation");
     const discriminant = b * b - 4 * a * c;
@@ -48,11 +48,11 @@ export default function ComplexConverter() {
     } else {
       const realPart = -b / (2 * a);
       const imagPart = Math.sqrt(-discriminant) / (2 * a);
-      return [`${realPart} + ${imagPart}i`, `${realPart} - ${imagPart}i`];
+      return [`X1=${realPart} + ${imagPart}i`, `X2=${realPart} - ${imagPart}i`];
     }
   }
 
-  function solveCubic(inputs) {
+ export function solveCubic(inputs) {
     const [a, b, c, d] = inputs;
     if (a === 0) throw new Error("Not a cubic equation");
 
@@ -73,7 +73,7 @@ export default function ComplexConverter() {
       const u = Math.cbrt(-q / 2);
       const root1 = 2 * u - a1 / 3;
       const root2 = -u - a1 / 3;
-      return [root1.toString(), root2.toString(), root2.toString()];
+      return [`X1=${root1.toString()}, X2=${root2.toString()}, X2=${root2.toString()}`];
     } else {
       const r = Math.sqrt(-p * p * p / 27);
       const phi = Math.acos(-q / (2 * r));
@@ -81,15 +81,11 @@ export default function ComplexConverter() {
       const root1 = t * Math.cos(phi / 3) - a1 / 3;
       const root2 = t * Math.cos((phi + 2 * PI) / 3) - a1 / 3;
       const root3 = t * Math.cos((phi + 4 * PI) / 3) - a1 / 3;
-      return [root1.toString(), root2.toString(), root3.toString()];
+      return [`X1=${root1.toString()}, X2=${root2.toString()}, X3=${root3.toString()}`];
     }
   }
 
 
-  console.log("Two Variable:", solveTwoVariable([2, 3, 5, 1, -1, -2]));
-  console.log("Three Variable:", solveThreeVariable([1, 1, 1, 6, 0, 2, 5, -4, 2, 1, 1, 3]));
-  console.log("Quadratic:", solveQuadratic([1, -3, 2]));
-  console.log("Cubic:", solveCubic([1, -6, 11, -6]));
 
-  return null;
-}
+
+

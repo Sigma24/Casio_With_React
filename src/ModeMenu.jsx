@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "./ModeMenu.css";
 
-const ModeMenu = ({ showMenu, setShowMenu, setSelectedMode, shift, reset }) => {
+const ModeMenu = ({ showMenu, setShowMenu, setSelectedMode, reset,onEquationSelect }) => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [secondSelectedItem, setSecondSelectedItem] = useState(null);
 
@@ -36,14 +36,30 @@ const ModeMenu = ({ showMenu, setShowMenu, setSelectedMode, shift, reset }) => {
   };
 
   const handleSubMenuClick = (item) => {
-    if (secondMenuData[item]) {
-      setSecondSelectedItem(item);
-    } else {
-     
-      setShowMenu(false);
-      setSelectedItem(null);
+  if (secondMenuData[item]) {
+    setSecondSelectedItem(item);
+  } else {
+    // Detect equation selection
+    if (selectedItem === "EQUATION") {
+      let type = "";
+      switch (item) {
+        case "anX + bnY = cn": type = "2var"; break;
+        case "aXn + bnY + cnZ = dn": type = "3var"; break;
+        case "aX² + bX + c = 0": type = "quadratic"; break;
+        case "aX³ + bX² + cX + d = 0": type = "cubic"; break;
+        default: break;
+      }
+
+      if (type && onEquationSelect) {
+        onEquationSelect(type); // Trigger overlay
+      }
     }
-  };
+
+    setShowMenu(false);
+    setSelectedItem(null);
+  }
+};
+
 
   const handleSecondSubMenuClick = (item) => {
     
