@@ -1,32 +1,39 @@
 import React, { useState } from "react";
-import "./matrix.css";
+import "./vector.css";
 
-const VectorShift = ({ showVectorMenu, setShowVectorMenu, shift, resetshift, onDataSelect }) => {
+const VectorShift = ({ showVectorMenu, setShowVectorMenu, resetshift,setInput}) => {
   
   const [selectedItem, setSelectedItem] = useState(null);
 
   const vectors = ["vectA", "vectB", "vectC", "Data", "Dot"];
-  const dataSubMenu = ["vectA", "vectB", "vectC"];
 
-  const handleConversionClick = (vector) => {
-    if (vector === "Data") {
-      setSelectedItem("Data"); 
-    } else {
-      console.log("Selected Conversion:", vector);
-      setShowVectorMenu(false);
-      resetshift();
-    }
-  };
 
-  const handleDataClick = async (item) => {
-    console.log(`Data selected for: ${item}`);
+const handleConversionClick = (vector) => {
+  if (vector === "Data") {
+    const stored = JSON.parse(localStorage.getItem("vectors")) || {};
 
-  
-    onDataSelect(item); 
-    
-    setShowVectorMenu(false);
-    setSelectedItem(null);
-  };
+    const vectA = stored.vectA || [0, 0];
+    const vectB = stored.vectB || [0, 0];
+    const vectC = stored.vectC || [0, 0];
+
+    const format = (label, values) => `${label}={${values.join(",")}}`;
+
+    const resultString = [
+      format("vectA", vectA),
+      format("vectB", vectB),
+      format("vectC", vectC)
+    ].join(", ");
+
+    setInput(resultString);
+  } else if (vector === "Dot") {
+    setInput(".");
+  } else {
+    setInput((inp) => inp + vector);
+  }
+
+  setShowVectorMenu(false);
+  resetshift();
+};
 
   return (
     <>
@@ -50,25 +57,7 @@ const VectorShift = ({ showVectorMenu, setShowVectorMenu, shift, resetshift, onD
         </div>
       )}
 
-      {selectedItem === "Data" && (
-        <div className="menu">
-          <a href="#" className="cancel" onClick={() => setSelectedItem(null)}>
-            Cancel
-          </a>
-          <p className="menu-title">DATA</p>
-          <ul className="menu-list">
-            {dataSubMenu.map((value, index) => (
-              <li
-                key={index}
-                className="menu-item"
-                onClick={() => handleDataClick(value)}
-              >
-                {index + 1}: {value}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+     
     </>
   );
 };

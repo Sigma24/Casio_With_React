@@ -10,7 +10,7 @@
   import ConstMenu from "./const"
   import Graph from "./graph";
   import ConvBtnMenu from "./conv";
-  import  MatrixShift from "./matrix"
+ 
   import BaseShift from "./base_n";
   import CmplxShift from "./cmplx";
   import StatsShift from "./stats";
@@ -20,6 +20,7 @@ import { evaluateExpression } from "./eval";
 import HistoryManager from "./History";
 import HistoryOverlay from "./history_UI"
 import EquationOverlay from "./Equationoverlay";
+import VectorOverlay from "./VectorOverlay";
 
   function Calculator() {
     
@@ -36,14 +37,15 @@ import EquationOverlay from "./Equationoverlay";
     const [type, settype] = useState("degree")
     const[graph , setgraph]=useState(false)
     const [convmenu, setconvmenu] = useState(false)
-    const [matrix, setmatrix] = useState(false)
+
     const [vector, setvctor] = useState(false)
     const [base, setbase] = useState(false)
     const [cmplx, setcmplx] = useState(false)
     const [stat, setstat] = useState(false)
     const textAreaRef = useRef(null);
-    const [selectedmatData, setSelectedmatData] = useState(""); 
-    const [selectedvectData, setSelectedvectData] = useState(""); 
+const [vectorOverlayVisible, setVectorOverlayVisible] = useState(false);
+const [vectorName, setVectorName] = useState("");
+const [vectorSize, setVectorSize] = useState("");
     const[hyp,sethyp]=useState("")
     const [dmsMode, setDmsMode] = useState(false);
 const [originalDecimal, setOriginalDecimal] = useState(null);
@@ -192,15 +194,9 @@ useEffect(() => {
 
 
 
-const MatrixDataSelect = (item) => {
-  setInput((inp) => inp + item); 
-  setSelectedmatData(item);
-};
 
-const vectorDataSelect = (item) => {
-  setInput((inp) => inp + item); 
-  setSelectedvectData(item);
-};
+
+
 
 
 
@@ -264,12 +260,9 @@ function eight(){
 
 
 function four(){
-  if (shift==1&&selectedMode==="MATRIX"){
-    setmatrix(true)
-  }
-  else{
-    setInput((inp)=>inp+'4')
-  }
+
+  setInput((inp)=>inp+'4')
+  
 } 
 
 function six(){
@@ -563,14 +556,15 @@ function dot(){
   }
 }
 
+const handleVectorSelect = (name, size) => {
+  setVectorName(name);
+  setVectorSize(size);
+  setVectorOverlayVisible(true);
+};
 
 
 
-
-
-
-
-   return (
+return (
     
       <div className="calculatorContainer">
         <div className="mainView">
@@ -835,6 +829,7 @@ function dot(){
             shift={shift}
             reset={resetshift}
             onEquationSelect={handleEquationSelect}
+            onVectorSizeSelect={handleVectorSelect}
           />
      
         </div>
@@ -854,6 +849,14 @@ function dot(){
   historyItems={historyItems}
   onDelete={handleDeleteHistoryItem}
 />
+
+<VectorOverlay
+  visible={vectorOverlayVisible}
+  onClose={() => setVectorOverlayVisible(false)}
+  vectorName={vectorName}
+  vectorSize={vectorSize}
+/>
+
 
         {shiftMenu && (
         <div className="modeMenuContainer">
@@ -906,17 +909,7 @@ function dot(){
       )}
 
 
-  {matrix && (
-        <div className="modeMenuContainer">
-          <MatrixShift
-            showMatrixMenu={matrix}
-            setShowMatrixMenu={setmatrix}
-            onDataSelect={MatrixDataSelect}
-            shift={shift}
-            resetshift={resetshift} 
-          />
-        </div>
-      )}
+
      
      {vector && (
         <div className="modeMenuContainer">
@@ -925,7 +918,8 @@ function dot(){
             setShowVectorMenu={setvctor}
             shift={shift}
             resetshift={resetshift} 
-            onDataSelect={vectorDataSelect}
+            setInput={setInput}
+         
           />
         </div>
       )}

@@ -1,32 +1,52 @@
 import React, { useState } from "react";
 import "./ModeMenu.css";
 
-const ModeMenu = ({ showMenu, setShowMenu, setSelectedMode, reset,onEquationSelect }) => {
+const ModeMenu = ({ showMenu, setShowMenu, setSelectedMode, reset, onEquationSelect, onVectorSizeSelect }) => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [secondSelectedItem, setSecondSelectedItem] = useState(null);
 
-  const Mode = ["MATH", "CMPLX", "BASEN", "STATISTICS", "EQUATION", "TABLE", "MATRIX", "VECTOR"];
+  const Mode = [
+    "MATH",
+    "CMPLX",
+    "BASEN",
+    "STATISTICS",
+    "EQUATION",
+    "TABLE",
+    "MATRIX",
+    "VECTOR"
+  ];
 
   const subMenuData = {
     MATRIX: ["MatA", "MatB", "MatC"],
     VECTOR: ["vectA", "vectB", "vectC"],
     BASEN: ["Decimal", "Binary", "Hexa", "Octal"],
-    STATISTICS: ["1-VAR", "A+BX", "--+CX²", "LN X", "eˣ", "A·Bˣ", "A·Xˣ", "1/X"],
-    EQUATION: ["anX + bnY = cn", "aXn + bnY + cnZ = dn", "aX² + bX + c = 0", "aX³ + bX² + cX + d = 0"],
+    STATISTICS: [
+      "1-VAR",
+      "A+BX",
+      "--+CX²",
+      "LN X",
+      "eˣ",
+      "A·Bˣ",
+      "A·Xˣ",
+      "1/X"
+    ],
+    EQUATION: [
+      "anX + bnY = cn",
+      "aXn + bnY + cnZ = dn",
+      "aX² + bX + c = 0",
+      "aX³ + bX² + cX + d = 0"
+    ]
   };
 
   const secondMenuData = {
-    MatA: ["1 x 1", "1 x 2", "1 x 3", "2 x 1", "2 x 2", "2 x 3", "3 x 1", "3 x 2", "3 x 3"],
-    MatB: ["1 x 1", "1 x 2", "1 x 3", "2 x 1", "2 x 2", "2 x 3", "3 x 1", "3 x 2", "3 x 3"],
-    MatC: ["1 x 1", "1 x 2", "1 x 3", "2 x 1", "2 x 2", "2 x 3", "3 x 1", "3 x 2", "3 x 3"],
-    vectA: ["1 x 1", "1 x 2", "1 x 3", "2 x 1", "2 x 2", "2 x 3", "3 x 1", "3 x 2", "3 x 3"],
-    vectB: ["1 x 1", "1 x 2", "1 x 3", "2 x 1", "2 x 2", "2 x 3", "3 x 1", "3 x 2", "3 x 3"],
-    vectC: ["1 x 1", "1 x 2", "1 x 3", "2 x 1", "2 x 2", "2 x 3", "3 x 1", "3 x 2", "3 x 3"],
+    vectA: ["1:2", "1:3"],
+    vectB: ["1:2", "1:3"],
+    vectC: ["1:2", "1:3"]
   };
 
   const handleModeClick = (mode) => {
     if (subMenuData[mode]) {
-      setSelectedMode(mode); 
+      setSelectedMode(mode);
       setSelectedItem(mode);
     } else {
       setSelectedMode(mode);
@@ -36,36 +56,37 @@ const ModeMenu = ({ showMenu, setShowMenu, setSelectedMode, reset,onEquationSele
   };
 
   const handleSubMenuClick = (item) => {
-  if (secondMenuData[item]) {
-    setSecondSelectedItem(item);
-  } else {
-    // Detect equation selection
-    if (selectedItem === "EQUATION") {
-      let type = "";
-      switch (item) {
-        case "anX + bnY = cn": type = "2var"; break;
-        case "aXn + bnY + cnZ = dn": type = "3var"; break;
-        case "aX² + bX + c = 0": type = "quadratic"; break;
-        case "aX³ + bX² + cX + d = 0": type = "cubic"; break;
-        default: break;
+    if (secondMenuData[item]) {
+      setSecondSelectedItem(item);
+      console.log(`Selected vector: ${item}`);
+    } else {
+      if (selectedItem === "EQUATION") {
+        let type = "";
+        switch (item) {
+          case "anX + bnY = cn":
+            type = "2var";
+            break;
+          case "aXn + bnY + cnZ = dn":
+            type = "3var";
+            break;
+          case "aX² + bX + c = 0":
+            type = "quadratic";
+            break;
+          case "aX³ + bX² + cX + d = 0":
+            type = "cubic";
+            break;
+          default:
+            break;
+        }
+
+        if (type && onEquationSelect) {
+          onEquationSelect(type);
+        }
       }
 
-      if (type && onEquationSelect) {
-        onEquationSelect(type); // Trigger overlay
-      }
+      setShowMenu(false);
+      setSelectedItem(null);
     }
-
-    setShowMenu(false);
-    setSelectedItem(null);
-  }
-};
-
-
-  const handleSecondSubMenuClick = (item) => {
-    
-    setShowMenu(false);
-    setSelectedItem(null);
-    setSecondSelectedItem(null);
   };
 
   return (
@@ -78,7 +99,11 @@ const ModeMenu = ({ showMenu, setShowMenu, setSelectedMode, reset,onEquationSele
           <p className="menu-title">MODE</p>
           <ul className="menu-list">
             {Mode.map((value, index) => (
-              <li key={index} className="menu-item" onClick={() => handleModeClick(value)}>
+              <li
+                key={index}
+                className="menu-item"
+                onClick={() => handleModeClick(value)}
+              >
                 {index + 1}: {value}
               </li>
             ))}
@@ -94,7 +119,11 @@ const ModeMenu = ({ showMenu, setShowMenu, setSelectedMode, reset,onEquationSele
           <p className="menu-title">{selectedItem.toUpperCase()}</p>
           <ul className="menu-list">
             {subMenuData[selectedItem]?.map((value, index) => (
-              <li key={index} className="menu-item" onClick={() => handleSubMenuClick(value)}>
+              <li
+                key={index}
+                className="menu-item"
+                onClick={() => handleSubMenuClick(value)}
+              >
                 {index + 1}: {value}
               </li>
             ))}
@@ -104,14 +133,32 @@ const ModeMenu = ({ showMenu, setShowMenu, setSelectedMode, reset,onEquationSele
 
       {secondSelectedItem && (
         <div className="menu">
-          <a href="#" className="cancel" onClick={() => setSecondSelectedItem(null)}>
+          <a
+            href="#"
+            className="cancel"
+            onClick={() => setSecondSelectedItem(null)}
+          >
             Cancel
           </a>
           <p className="menu-title">{secondSelectedItem}</p>
           <ul className="menu-list">
-            {secondMenuData[secondSelectedItem]?.map((value, index) => (
-              <li key={index} className="menu-item" onClick={() => handleSecondSubMenuClick(value)}>
-                {index + 1}: {value}
+            {secondMenuData[secondSelectedItem]?.map((size, index) => (
+              <li
+                key={index}
+                className="menu-item"
+                onClick={() => {
+                  if (onVectorSizeSelect) {
+                    console.log(
+                      `Calling overlay for ${secondSelectedItem} with size ${size}`
+                    );
+                    onVectorSizeSelect(secondSelectedItem, size);
+                  }
+                  setShowMenu(false);
+                  setSelectedItem(null);
+                  setSecondSelectedItem(null);
+                }}
+              >
+                {index + 1}: {size}
               </li>
             ))}
           </ul>

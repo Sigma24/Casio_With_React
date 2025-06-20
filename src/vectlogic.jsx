@@ -1,4 +1,4 @@
-  const VectorOperations = {
+  export const VectorOperations = {
     parseVector: (vector) => {
       return vector?.map(v => parseFloat(v)).filter(v => !isNaN(v)) || null;
     },
@@ -30,6 +30,7 @@
       if (!v1 || !v2 || v1.length !== v2.length) return null;
       return v1.reduce((sum, val, i) => sum + val * v2[i], 0);
     }
+   
   };
 
-  return null;
+ 

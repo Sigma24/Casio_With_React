@@ -8,6 +8,7 @@ import { polarToRectangular ,rectangularToPolar,complexConjugate,complexArgument
 import { convertValueofConversion } from './conv';
 import { logicGate } from './basenlogic';
 import { constantsMap } from './const';
+import { VectorOperations } from './vectlogic';
 
 function formatFunctionExpr(expr) {
   const superscripts = {
@@ -269,6 +270,133 @@ export function evaluateExpression(expr, mode = 'RAD') {
     expr = expr.replace(/([^0-9a-zA-Z_])e([^0-9])/g, `$1(${Math.E})$2`);
     expr = expr.replace(/^e([^0-9])/g, `(${Math.E})$1`);
     expr = expr.replace(/([^0-9a-zA-Z_])e$/g, `$1(${Math.E})`);
+
+
+
+   // --- Vector Arithmetic Support ---
+// 12. Handle Vector Arithmetic and Dot Product
+// --- Vector Expressions with Parentheses ---
+if (/vect[ABC]/.test(expr)) {
+  const stored = JSON.parse(localStorage.getItem("vectors")) || {};
+  const vectorLabels = ["vectA", "vectB", "vectC"];
+
+  // Validate & map vector names to their arrays
+  const vectorValues = {};
+  for (let name of vectorLabels) {
+    const val = stored[name];
+    if (!Array.isArray(val)) throw new Error(`${name} is undefined or invalid`);
+    vectorValues[name] = val;
+  }
+
+  // Replace vectX with temp variables like _v_vectA
+  let transformed = expr.replace(/\s+/g, '');
+  for (let name of vectorLabels) {
+    transformed = transformed.replaceAll(name, `_v_${name}`);
+  }
+
+  // Replace . with __DOT__ so it's not misinterpreted
+  transformed = transformed.replace(/\./g, '__DOT__');
+
+  // Convert infix expressions to function-style
+  // 1. Handle dot products: a__DOT__b → __DOT__(a, b)
+  transformed = transformed.replace(/(_v_vect[ABC])__DOT__(_v_vect[ABC])/g, `__DOT__($1, $2)`);
+
+  // 2. Replace vector addition/subtraction:
+  // Convert A+B → add(A,B), A+B-C → sub(add(A,B),C)
+  const parseAddSub = (input) => {
+    const tokens = input.match(/(?:__DOT__\([^)]+\)|_v_vect[ABC]|[+\-()])/g);
+    if (!tokens) return input;
+
+    let stack = [];
+    let i = 0;
+
+    const parse = () => {
+      let operands = [];
+      let operator = null;
+
+      while (i < tokens.length) {
+        const token = tokens[i++];
+
+        if (token === "(") {
+          operands.push(parse());
+        } else if (token === ")") {
+          break;
+        } else if (token === "+" || token === "-") {
+          operator = token;
+        } else {
+          if (operator && operands.length) {
+            const left = operands.pop();
+            const right = token;
+            const opFunc = operator === "+" ? "add" : "sub";
+            operands.push(`${opFunc}(${left}, ${right})`);
+            operator = null;
+          } else {
+            operands.push(token);
+          }
+        }
+      }
+
+      return operands[0];
+    };
+
+    return parse();
+  };
+
+  transformed = parseAddSub(transformed);
+
+  // Build the scope
+  const scope = {
+    __DOT__: (a, b) => {
+      if (!Array.isArray(a) || !Array.isArray(b)) throw new Error("Dot requires two vectors");
+      const result = VectorOperations.dotProduct(a, b);
+      if (result === null) throw new Error("Size mismatch in dot product");
+      return result;
+    },
+    add: (...args) => {
+      const parsed = args.filter(v => Array.isArray(v));
+      if (parsed.length < 2 || parsed.length > 3) return null;
+      if (!VectorOperations.allSameSize(parsed)) return null;
+      return parsed.reduce((acc, curr) => acc.map((v, i) => v + curr[i]));
+    },
+    sub: (...args) => {
+      const parsed = args.filter(v => Array.isArray(v));
+      if (parsed.length < 2 || parsed.length > 3) return null;
+      if (!VectorOperations.allSameSize(parsed)) return null;
+      return parsed.reduce((acc, curr) => acc.map((v, i) => v - curr[i]));
+    },
+    _v_vectA: vectorValues.vectA,
+    _v_vectB: vectorValues.vectB,
+    _v_vectC: vectorValues.vectC,
+  };
+
+  try {
+  const result = Function(...Object.keys(scope), `return ${transformed}`)(...Object.values(scope));
+if (result === null) throw new Error("Vector calculation failed");
+
+// Extra safety: prevent adding scalar to vector
+if (
+  typeof result === "number" &&
+  /\+_v_vect[ABC]/.test(transformed) // crude pattern: scalar + vector
+) {
+  throw new Error("Cannot add scalar to vector");
+}
+
+return result;
+
+  } catch (err) {
+    throw new Error("Invalid vector expression: " + err.message);
+  }
+}
+
+
+
+
+
+
+
+
+
+
 
 
     // 4. Logic Gates (Binary)
