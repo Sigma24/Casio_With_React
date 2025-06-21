@@ -176,11 +176,97 @@ function evaluateArithmetic(expr, mode) {
   return result;
 }
 
+function evaluateLogicExpression(expr) {
+  // Convert to lowercase and remove spaces (except within parentheses)
+  let expression = expr.toLowerCase().replace(/\s+(?![^(]*\))/g, '');
+
+  // First handle neg() operations separately since they're not standard logic gates
+  while (expression.includes('neg(')) {
+    const negMatch = expression.match(/neg\(([01]+)\)/);
+    if (!negMatch) break;
+    
+    const inside = negMatch[1];
+    if (!/^[01]+$/.test(inside)) return null;
+    
+    const value = parseInt(inside, 2);
+    const bitLength = inside.length;
+    const result = (-value) & ((1 << bitLength) - 1);
+    const resultStr = result.toString(2).padStart(bitLength, '0');
+    
+    expression = expression.replace(`neg(${inside})`, resultStr);
+  }
+
+  // Then process the rest of the logic operations
+  return evaluateStandardLogic(expression);
+}
+
+function evaluateStandardLogic(expression) {
+  const isBinary = (str) => /^[01]+$/.test(str);
+  const binToDec = (bin) => parseInt(bin, 2);
+  const decToBin = (dec, length = 0) => (dec >>> 0).toString(2).padStart(length, '0');
+
+  // Process parentheses first
+  while (expression.includes('(')) {
+    const parenMatch = expression.match(/\(([^()]+)\)/);
+    if (!parenMatch) break;
+    
+    const innerResult = evaluateStandardLogic(parenMatch[1]);
+    if (innerResult === null) return null;
+    
+    expression = expression.replace(`(${parenMatch[1]})`, innerResult);
+  }
+
+  // Handle NOT operations
+  while (expression.startsWith('not(') && expression.endsWith(')')) {
+    const inside = expression.slice(4, -1);
+    if (!isBinary(inside)) return null;
+    
+    const value = binToDec(inside);
+    const bitLength = inside.length;
+    const result = ~value & ((1 << bitLength) - 1);
+    expression = decToBin(result, bitLength);
+  }
+
+  // Handle binary operations with proper precedence
+  const operators = [
+    { regex: /([01]+)and([01]+)/, handler: (a, b) => a & b },
+    { regex: /([01]+)xor([01]+)/, handler: (a, b) => a ^ b },
+    { regex: /([01]+)xnor([01]+)/, handler: (a, b, len) => ~(a ^ b) & ((1 << len) - 1) },
+    { regex: /([01]+)or([01]+)/, handler: (a, b) => a | b }
+  ];
+
+  let changed;
+  do {
+    changed = false;
+    for (const op of operators) {
+      const match = expression.match(op.regex);
+      if (match) {
+        const left = match[1];
+        const right = match[2];
+        if (!isBinary(left) || !isBinary(right)) return null;
+        
+        const a = binToDec(left);
+        const b = binToDec(right);
+        const bitLength = Math.max(left.length, right.length);
+        let result = op.handler(a, b, bitLength);
+        
+        expression = expression.replace(match[0], decToBin(result, bitLength));
+        changed = true;
+        break;
+      }
+    }
+  } while (changed);
+
+  return isBinary(expression) ? expression : null;
+}
+
 
 
 export function evaluateExpression(expr, mode = 'RAD') {
   try {
     if (!expr || typeof expr !== 'string') throw new Error("Empty input");
+    const logicResult = evaluateLogicExpression(expr);
+    if (logicResult !== null) return logicResult;
 
     // 1. Normalize input
     expr = expr.trim()
@@ -251,192 +337,191 @@ export function evaluateExpression(expr, mode = 'RAD') {
 
     expr = replaceConstantsInExpr(expr);
 
-
-
-        // 9. Handle RandInt(min, max)
+    // 4. Handle RandInt(min, max)
     expr = expr.replace(/RandInt\((\d+),\s*(\d+)\)?/gi, (_, min, max) => {
       const low = parseInt(min, 10);
       const high = parseInt(max, 10);
       return Math.floor(Math.random() * (high - low + 1)) + low;
     });
 
-    // 10. Handle Ran# (Random Float)
+    // 5. Handle Ran# (Random Float)
     expr = expr.replace(/Ran#/gi, () => {
       return Math.random();
     });
 
-    // 11. Replace π and e if not scientific notation
+    // 6. Replace π and e if not scientific notation
     expr = expr.replace(/π/g, `(${Math.PI})`);
     expr = expr.replace(/([^0-9a-zA-Z_])e([^0-9])/g, `$1(${Math.E})$2`);
     expr = expr.replace(/^e([^0-9])/g, `(${Math.E})$1`);
     expr = expr.replace(/([^0-9a-zA-Z_])e$/g, `$1(${Math.E})`);
 
+    // 7. Vector Arithmetic Support
+    if (/vect[ABC]/.test(expr)) {
+      const stored = JSON.parse(localStorage.getItem("vectors")) || {};
+      const vectorLabels = ["vectA", "vectB", "vectC"];
 
+      // Validate & map vector names to their arrays
+      const vectorValues = {};
+      for (let name of vectorLabels) {
+        const val = stored[name];
+        if (!Array.isArray(val)) throw new Error(`${name} is undefined or invalid`);
+        vectorValues[name] = val;
+      }
 
-   // --- Vector Arithmetic Support ---
-// 12. Handle Vector Arithmetic and Dot Product
-// --- Vector Expressions with Parentheses ---
-if (/vect[ABC]/.test(expr)) {
-  const stored = JSON.parse(localStorage.getItem("vectors")) || {};
-  const vectorLabels = ["vectA", "vectB", "vectC"];
+      // Replace vectX with temp variables like _v_vectA
+      let transformed = expr.replace(/\s+/g, '');
+      for (let name of vectorLabels) {
+        transformed = transformed.replaceAll(name, `_v_${name}`);
+      }
 
-  // Validate & map vector names to their arrays
-  const vectorValues = {};
-  for (let name of vectorLabels) {
-    const val = stored[name];
-    if (!Array.isArray(val)) throw new Error(`${name} is undefined or invalid`);
-    vectorValues[name] = val;
-  }
+      // Replace . with __DOT__ so it's not misinterpreted
+      transformed = transformed.replace(/\./g, '__DOT__');
 
-  // Replace vectX with temp variables like _v_vectA
-  let transformed = expr.replace(/\s+/g, '');
-  for (let name of vectorLabels) {
-    transformed = transformed.replaceAll(name, `_v_${name}`);
-  }
+      // Convert infix expressions to function-style
+      // 1. Handle dot products: a__DOT__b → __DOT__(a, b)
+      transformed = transformed.replace(/(_v_vect[ABC])__DOT__(_v_vect[ABC])/g, `__DOT__($1, $2)`);
 
-  // Replace . with __DOT__ so it's not misinterpreted
-  transformed = transformed.replace(/\./g, '__DOT__');
+      // 2. Replace vector addition/subtraction:
+      const parseAddSub = (input) => {
+        const tokens = input.match(/(?:__DOT__\([^)]+\)|_v_vect[ABC]|[+\-()])/g);
+        if (!tokens) return input;
 
-  // Convert infix expressions to function-style
-  // 1. Handle dot products: a__DOT__b → __DOT__(a, b)
-  transformed = transformed.replace(/(_v_vect[ABC])__DOT__(_v_vect[ABC])/g, `__DOT__($1, $2)`);
+        let stack = [];
+        let i = 0;
 
-  // 2. Replace vector addition/subtraction:
-  // Convert A+B → add(A,B), A+B-C → sub(add(A,B),C)
-  const parseAddSub = (input) => {
-    const tokens = input.match(/(?:__DOT__\([^)]+\)|_v_vect[ABC]|[+\-()])/g);
-    if (!tokens) return input;
+        const parse = () => {
+          let operands = [];
+          let operator = null;
 
-    let stack = [];
-    let i = 0;
+          while (i < tokens.length) {
+            const token = tokens[i++];
 
-    const parse = () => {
-      let operands = [];
-      let operator = null;
-
-      while (i < tokens.length) {
-        const token = tokens[i++];
-
-        if (token === "(") {
-          operands.push(parse());
-        } else if (token === ")") {
-          break;
-        } else if (token === "+" || token === "-") {
-          operator = token;
-        } else {
-          if (operator && operands.length) {
-            const left = operands.pop();
-            const right = token;
-            const opFunc = operator === "+" ? "add" : "sub";
-            operands.push(`${opFunc}(${left}, ${right})`);
-            operator = null;
-          } else {
-            operands.push(token);
+            if (token === "(") {
+              operands.push(parse());
+            } else if (token === ")") {
+              break;
+            } else if (token === "+" || token === "-") {
+              operator = token;
+            } else {
+              if (operator && operands.length) {
+                const left = operands.pop();
+                const right = token;
+                const opFunc = operator === "+" ? "add" : "sub";
+                operands.push(`${opFunc}(${left}, ${right})`);
+                operator = null;
+              } else {
+                operands.push(token);
+              }
+            }
           }
+
+          return operands[0];
+        };
+
+        return parse();
+      };
+
+      transformed = parseAddSub(transformed);
+
+      // Build the scope
+      const scope = {
+        __DOT__: (a, b) => {
+          if (!Array.isArray(a) || !Array.isArray(b)) throw new Error("Dot requires two vectors");
+          const result = VectorOperations.dotProduct(a, b);
+          if (result === null) throw new Error("Size mismatch in dot product");
+          return result;
+        },
+        add: (...args) => {
+          const parsed = args.filter(v => Array.isArray(v));
+          if (parsed.length < 2 || parsed.length > 3) return null;
+          if (!VectorOperations.allSameSize(parsed)) return null;
+          return parsed.reduce((acc, curr) => acc.map((v, i) => v + curr[i]));
+        },
+        sub: (...args) => {
+          const parsed = args.filter(v => Array.isArray(v));
+          if (parsed.length < 2 || parsed.length > 3) return null;
+          if (!VectorOperations.allSameSize(parsed)) return null;
+          return parsed.reduce((acc, curr) => acc.map((v, i) => v - curr[i]));
+        },
+        _v_vectA: vectorValues.vectA,
+        _v_vectB: vectorValues.vectB,
+        _v_vectC: vectorValues.vectC,
+      };
+
+      try {
+        const result = Function(...Object.keys(scope), `return ${transformed}`)(...Object.values(scope));
+        if (result === null) throw new Error("Vector calculation failed");
+
+        // Extra safety: prevent adding scalar to vector
+        if (typeof result === "number" && /\+_v_vect[ABC]/.test(transformed)) {
+          throw new Error("Cannot add scalar to vector");
         }
-      }
 
-      return operands[0];
-    };
-
-    return parse();
-  };
-
-  transformed = parseAddSub(transformed);
-
-  // Build the scope
-  const scope = {
-    __DOT__: (a, b) => {
-      if (!Array.isArray(a) || !Array.isArray(b)) throw new Error("Dot requires two vectors");
-      const result = VectorOperations.dotProduct(a, b);
-      if (result === null) throw new Error("Size mismatch in dot product");
-      return result;
-    },
-    add: (...args) => {
-      const parsed = args.filter(v => Array.isArray(v));
-      if (parsed.length < 2 || parsed.length > 3) return null;
-      if (!VectorOperations.allSameSize(parsed)) return null;
-      return parsed.reduce((acc, curr) => acc.map((v, i) => v + curr[i]));
-    },
-    sub: (...args) => {
-      const parsed = args.filter(v => Array.isArray(v));
-      if (parsed.length < 2 || parsed.length > 3) return null;
-      if (!VectorOperations.allSameSize(parsed)) return null;
-      return parsed.reduce((acc, curr) => acc.map((v, i) => v - curr[i]));
-    },
-    _v_vectA: vectorValues.vectA,
-    _v_vectB: vectorValues.vectB,
-    _v_vectC: vectorValues.vectC,
-  };
-
-  try {
-  const result = Function(...Object.keys(scope), `return ${transformed}`)(...Object.values(scope));
-if (result === null) throw new Error("Vector calculation failed");
-
-// Extra safety: prevent adding scalar to vector
-if (
-  typeof result === "number" &&
-  /\+_v_vect[ABC]/.test(transformed) // crude pattern: scalar + vector
-) {
-  throw new Error("Cannot add scalar to vector");
-}
-
-return result;
-
-  } catch (err) {
-    throw new Error("Invalid vector expression: " + err.message);
-  }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-    // 4. Logic Gates (Binary)
-    const binaryGates = ["and", "or", "xor", "xnor"];
-    for (let gate of binaryGates) {
-      const pattern = new RegExp(`^(\\d)${gate}(\\d)$`, "i");
-      const match = expr.match(pattern);
-      if (match) {
-        const input1 = parseInt(match[1]);
-        const input2 = parseInt(match[2]);
-        return logicGate(gate, input1, input2);
+        return result;
+      } catch (err) {
+        throw new Error("Invalid vector expression: " + err.message);
       }
     }
 
-    // 5. Logic Gates (Unary)
-    const unaryGates = ["neg", "not"];
-    for (let gate of unaryGates) {
-      const pattern = new RegExp(`^${gate}\\(?(-?\\d+)\\)?$`, "i");
-      const match = expr.match(pattern);
-      if (match) {
-        const input1 = parseFloat(match[1]);
-        return logicGate(gate, input1);
-      }
+    // 8. Logic Gates (Binary)
+    const binToDec = (bin) => parseInt(bin, 2);
+    const decToBin = (dec, length) => (dec >>> 0).toString(2).padStart(length, '0');
+    const isBinary = (str) => /^[01]+$/.test(str);
+
+    // Handle NOT operation
+    if (expr.startsWith('not(') && expr.endsWith(')')) {
+      const inside = expr.slice(4, -1);
+      if (!isBinary(inside)) return 'Invalid input';
+      const bitLength = inside.length;
+      const result = ~binToDec(inside) & ((1 << bitLength) - 1);
+      return decToBin(result, bitLength);
     }
 
-    // 6. Complex Conjugate
+    // Regex to capture [binary][operator][binary]
+    const match = expr.match(/^([01]+)(and|or|xor|xnor)([01]+)$/);
+    if (match) {
+      const [, left, operator, right] = match;
+
+      const a = binToDec(left);
+      const b = binToDec(right);
+      const bitLength = Math.max(left.length, right.length);
+      let result;
+
+      switch (operator) {
+        case 'and':
+          result = a & b;
+          break;
+        case 'or':
+          result = a | b;
+          break;
+        case 'xor':
+          result = a ^ b;
+          break;
+        case 'xnor':
+          result = ~(a ^ b) & ((1 << bitLength) - 1);
+          break;
+        default:
+          return 'Unknown gate';
+      }
+
+      return decToBin(result, bitLength);
+    }
+
+    // 9. Complex Conjugate
     if (expr.startsWith("conj")) {
       const inner = expr.replace(/^conj\(?/, '').replace(/\)?$/, '');
       if (!inner) throw new Error("Invalid conj syntax");
       return complexConjugate(inner);
     }
 
-    // 7. Argument
+    // 10. Argument
     if (expr.startsWith('arg(')) {
       const input = expr.slice(4).replace(')', '').trim();
       if (!input) throw new Error("Invalid input to arg()");
       return complexArgument(input, mode);
     }
 
-    // 8. Polar Conversion
+    // 11. Polar Conversion
     if (expr.includes("⯈r∠θ")) {
       const [realPart] = expr.split("⯈r∠θ");
       return rectangularToPolar(realPart, mode);
@@ -458,12 +543,12 @@ return result;
       return polarToRectangular(r, theta, mode);
     }
 
-
+    // 12. Simple number check
     if (/^-?\d+(\.\d+)?$/.test(expr)) {
       return parseFloat(expr);
     }
 
-
+    // 13. Integration
     if (/^∫\s*\(u,l,f\(x\)\)\s*dx\s*->\s*\(([^,]+),([^,]+),([^)]+)\)/.test(expr)) {
       const match = expr.match(/^∫\s*\(u,l,f\(x\)\)\s*dx\s*->\s*\(([^,]+),([^,]+),([^)]+)\)/);
       const [lower, upper, rawFuncStr] = [parseFloat(match[1]), parseFloat(match[2]), match[3].trim()];
@@ -471,7 +556,7 @@ return result;
       return simpsonsRule(formatFunctionExpr(rawFuncStr), lower, upper);
     }
 
-
+    // 14. Derivative
     if (/^d\/dx\s*\(f\(x\),x\)\s*->\s*\(([^,]+),([^)]+)\)/.test(expr)) {
       const match = expr.match(/^d\/dx\s*\(f\(x\),x\)\s*->\s*\(([^,]+),([^)]+)\)/);
       const [rawFuncStr, xValue] = [match[1].trim(), parseFloat(match[2])];
@@ -479,7 +564,7 @@ return result;
       return numericalDerivative(formatFunctionExpr(rawFuncStr), xValue);
     }
 
-
+    // 15. Unit Conversion
     const unitConvPattern = /^(\d*\.?\d+)\s*([a-zA-Z]+)\s*►\s*([a-zA-Z\s().°°]+)$/;
     const matchConv = expr.match(unitConvPattern);
     if (matchConv) {
@@ -488,7 +573,7 @@ return result;
       return convertValueofConversion(value, fromTo);
     }
 
-   
+    // 16. Default arithmetic evaluation
     return evaluateArithmetic(expr, mode);
 
   } catch (err) {
@@ -496,6 +581,15 @@ return result;
     return "Error: " + err.message;
   }
 }
+
+// Helper functions would need to be defined elsewhere:
+// - VectorOperations (dotProduct, allSameSize)
+// - complexConjugate, complexArgument
+// - rectangularToPolar, polarToRectangular
+// - simpsonsRule, numericalDerivative
+// - formatFunctionExpr
+// - convertValueofConversion
+// - evaluateArithmetic
 
 
 

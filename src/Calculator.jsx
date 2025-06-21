@@ -22,6 +22,8 @@ import HistoryOverlay from "./history_UI"
 import EquationOverlay from "./Equationoverlay";
 import VectorOverlay from "./VectorOverlay";
 
+import GraphRangeOverlay from "./Graphoverlay";
+
   function Calculator() {
     
     const [input, setInput] = useState('');
@@ -52,6 +54,8 @@ const [originalDecimal, setOriginalDecimal] = useState(null);
   const [showHistory, setShowHistory] = useState(false);
   const [historyItems, setHistoryItems] = useState([]);
     const [equationType, setEquationType] = useState(null);
+   const [graphOverlayVisible, setGraphOverlayVisible] = useState(false);
+   const [graphData, setGraphData] = useState({ expression: '', startX: -10, endX: 10 });
 
 
 
@@ -564,6 +568,37 @@ const handleVectorSelect = (name, size) => {
 
 
 
+var graphready=useRef(false);
+function graphplot(){
+  if(!input){
+    setInput("fx=")
+  }
+   if (!input.startsWith("fx=")) {
+   
+    return;
+    }
+
+        const expr = input.slice(3).trim();
+
+    if (!expr.includes("x")) {
+      return;
+    }
+    setGraphData(prev => ({ ...prev, expression: expr }));
+    setGraphOverlayVisible(true);
+    graphready.current = true;
+  }
+
+
+  function handleRangePlot(start, end) {
+    if (!graphready.current) return;
+
+    setGraphData(prev => ({ ...prev, startX: start, endX: end }));
+    setgraph(true);
+    graphready.current = false;
+  }
+
+
+
 return (
     
       <div className="calculatorContainer">
@@ -591,7 +626,7 @@ return (
             <button className="modeBtn" onClick={types}>{text}</button>
             <button className="modeBtn">{modebtntext}</button>
             <button className="modeBtn3">{text_sa}</button>
-            <button className="graphBtn" onClick={()=>setgraph(true)}>GRAPH</button>
+            <button className="graphBtn" onClick={()=>graphplot()}>GRAPH</button>
           </div>
 
        
@@ -814,7 +849,16 @@ return (
 
    
 
-
+      {graphOverlayVisible && (
+        <GraphRangeOverlay
+          visible={graphOverlayVisible}
+          onClose={() => setGraphOverlayVisible(false)}
+          onPlot={(start, end) => {
+            setGraphOverlayVisible(false);
+            handleRangePlot(start, end);
+          }}
+        />
+      )}
 
 
 
@@ -964,10 +1008,14 @@ return (
       )}
 
 
-  {graph&& 
-  (
-  <Graph onClose={()=>setgraph(false)}/>)
-    }
+      {graph && (
+        <Graph
+          expression={graphData.expression}
+          startX={graphData.startX}
+          endX={graphData.endX}
+          onClose={() => setgraph(false)}
+        />
+      )}
 </div>
     );
   }
