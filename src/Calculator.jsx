@@ -388,7 +388,11 @@ function selectmode(){
 
 
 function sin(){
-   if(shift===1){
+    if(selectedMode=="BASEN"&&alpha==1){
+    setInput(inp=>inp+"D")
+    setalpha(0)
+  }
+  else if(shift===1){
     setInput(inp=>inp+"sin⁻¹(")
    }
    else{
@@ -397,7 +401,11 @@ function sin(){
 }
 
 function cos(){
-   if(shift===1){
+    if(selectedMode=="BASEN"&&alpha==1){
+    setInput(inp=>inp+"E")
+    setalpha(0)
+  }
+  else if(shift===1){
     setInput(inp=>inp+"cos⁻¹(")
    }
    else{
@@ -409,7 +417,11 @@ function cos(){
 
 
 function tan(){
-   if(shift===1){
+    if(selectedMode=="BASEN"&&alpha==1){
+    setInput(inp=>inp+"F")
+    setalpha(0)
+  }
+   else if(shift===1){
     setInput(inp=>inp+"tan⁻¹(")
    }
    else{
@@ -439,6 +451,11 @@ function fraction()
 }
 
 function dms() {
+if(selectedMode=="BASEN"&&alpha==1){
+  setInput(inp=>inp+"B")
+  setalpha(0)
+}
+else{
   if (answer) {
     if (typeof answer === 'number' && !dmsMode) {
       // Convert decimal to DMS
@@ -463,6 +480,7 @@ function dms() {
     setInput(prevInput => (prevInput || "") + "°")
   }
 }
+}
 
 function inverse(){
   if(shift===1){
@@ -473,15 +491,60 @@ function inverse(){
   }
 }
 
-function log (){
 
- if(selectedMode=="BASEN"){
-    setanswer("Hex000000")
-    setalpha(0)
+function detectInputBase(input) {
+  if (/^[0-9A-Fa-f]+$/.test(input)) {
+    if (/^[01]+$/.test(input)) return 2;    // Binary
+    if (/^[0-7]+$/.test(input)) return 8;   // Octal
+    if (/^[0-9]+$/.test(input)) return 10;  // Decimal
+    return 16;                              // Hexadecimal (contains A-F)
   }
-  else{
-   setInput(inp=>inp+"Log(")}
+  return 10; // Default to decimal if not sure
 }
+
+// Helper function to format output with prefix and padding
+function formatOutput(value, prefix, length = 8) {
+  return prefix + value.toString().toUpperCase().padStart(length, '0');
+}
+
+function log() {
+  if (selectedMode === "BASEN") {
+    // Convert to octal
+    try {
+  
+      let num, inputBase;
+      
+      if (input.startsWith('hex')) {
+        num = parseInt(input.slice(3), 16);
+      } else if (input.startsWith('dec')) {
+        num = parseInt(input.slice(3), 10);
+      } else if (input.startsWith('bin')) {
+        num = parseInt(input.slice(3), 2);
+      } else if (input.startsWith('oct')) {
+        num = parseInt(input.slice(3), 8);
+      } else {
+        inputBase = detectInputBase(input);
+        num = parseInt(input, inputBase);
+      }
+      
+      if (isNaN(num)) throw new Error("Invalid input");
+      
+    
+      if (input.startsWith('oct') || (!input.startsWith('hex') && !input.startsWith('dec') && 
+          !input.startsWith('bin') && !input.startsWith('oct') && inputBase === 8)) {
+         setanswer(formatOutput(input.replace(/^(oct)?/i, ''), 'oct'));
+      } else {
+       setanswer(formatOutput(num.toString(8), 'oct'));
+      }
+    } catch (e) {
+     setanswer("Error");
+    }
+  } else {
+    setInput(inp => inp + "Log(");
+  }
+}
+
+
 function logbase(){
   if(shift===1){
   setInput(input=>input+"∑(X=a,b,f(X))->(")
@@ -492,19 +555,51 @@ function logbase(){
   }
 }
 
-function nln(){
-  if(shift===1){
-    setInput(inp=>inp+"eˣ(")
-    setshift(0)
+
+function nln() {
+  if (shift === 1) {
+    setInput(inp => inp + "eˣ(");
+    setshift(0);
+    return;
   }
-  if(selectedMode=="BASEN"){
-    setanswer("Oct000000")
-    setalpha(0)
-  }
-  else{
-  setInput(inp=>inp+"ln(")
+  
+  if (selectedMode === "BASEN") {
+    // Convert to hexadecimal
+    try {
+      
+      let num, inputBase;
+      
+      if (input.startsWith('hex')) {
+        num = parseInt(input.slice(3), 16);
+      } else if (input.startsWith('dec')) {
+        num = parseInt(input.slice(3), 10);
+      } else if (input.startsWith('bin')) {
+        num = parseInt(input.slice(3), 2);
+      } else if (input.startsWith('oct')) {
+        num = parseInt(input.slice(3), 8);
+      } else {
+        // Detect base when no prefix
+        inputBase = detectInputBase(input);
+        num = parseInt(input, inputBase);
+      }
+      
+      if (isNaN(num)) throw new Error("Invalid input");
+      
+      // If already hex and no prefix change, keep same
+      if (input.startsWith('hex') || (!input.startsWith('hex') && !input.startsWith('dec') && 
+          !input.startsWith('bin') && !input.startsWith('oct') && inputBase === 16)) {
+        setanswer(formatOutput(input.replace(/^(hex)?/i, ''), 'hex'));
+      } else {
+         setanswer(formatOutput(num.toString(16), 'hex'));
+      }
+    } catch (e) {
+       setanswer("Error");
+    }
+  } else {
+    setInput(inp => inp + "ln(");
   }
 }
+
 
 function evaluate(){
   if (shift===1){
@@ -535,22 +630,79 @@ function root(){
 
 }
 
-function power(){
-      if(selectedMode=="BASEN"){
-    setanswer("Bin000000")
-  
-  }else{
-  setInput(inp=>inp+"^2")
+function power() {
+  if (selectedMode === "BASEN") {
+    // Convert to binary
+    try {
+     
+      let num, inputBase;
+      
+      if (input.startsWith('hex')) {
+        num = parseInt(input.slice(3), 16);
+      } else if (input.startsWith('dec')) {
+        num = parseInt(input.slice(3), 10);
+      } else if (input.startsWith('bin')) {
+        num = parseInt(input.slice(3), 2);
+      } else if (input.startsWith('oct')) {
+        num = parseInt(input.slice(3), 8);
+      } else {
+        inputBase = detectInputBase(input);
+        num = parseInt(input, inputBase);
+      }
+      
+      if (isNaN(num)) throw new Error("Invalid input");
+      
+      // If already binary and no prefix change, keep same
+      if (input.startsWith('bin') || (!input.startsWith('hex') && !input.startsWith('dec') && 
+          !input.startsWith('bin') && !input.startsWith('oct') && inputBase === 2)) {
+        setanswer(formatOutput(input.replace(/^(bin)?/i, ''), 'bin'));
+      } else {
+        setanswer(formatOutput(num.toString(2), 'bin'));
+      }
+    } catch (e) {
+       setanswer("Error");
+    }
+  } else {
+    setInput(inp => inp + "^2");
   }
 }
 
-function doublepower(){
-      if(selectedMode=="BASEN"){
-    setanswer("Dec000000")
-  
-  }else{
-  setInput(inp=>inp+"xʸ->(")
-}}
+function doublepower() {
+  if (selectedMode === "BASEN") {
+    // Convert to decimal
+    try {
+    
+      let num, inputBase;
+      
+      if (input.startsWith('hex')) {
+        num = parseInt(input.slice(3), 16);
+      } else if (input.startsWith('dec')) {
+        num = parseInt(input.slice(3), 10);
+      } else if (input.startsWith('bin')) {
+        num = parseInt(input.slice(3), 2);
+      } else if (input.startsWith('oct')) {
+        num = parseInt(input.slice(3), 8);
+      } else {
+        inputBase = detectInputBase(input);
+        num = parseInt(input, inputBase);
+      }
+      
+      if (isNaN(num)) throw new Error("Invalid input");
+      
+      // If already decimal and no prefix change, keep same
+      if (input.startsWith('dec') || (!input.startsWith('hex') && !input.startsWith('dec') && 
+          !input.startsWith('bin') && !input.startsWith('oct') && inputBase === 10)) {
+        setanswer(formatOutput(input.replace(/^(dec)?/i, ''), 'dec'));
+      } else {
+        setanswer(formatOutput(num.toString(10), 'dec'));
+      }
+    } catch (e) {
+     setanswer("Error");
+    }
+  } else {
+    setInput(inp => inp + "xʸ->(");
+  }
+}
 
   function handleDeleteHistoryItem(index) {
     HistoryManager.deleteHistoryItem(index);
@@ -575,8 +727,13 @@ function Polar (){
   if (selectedMode=="CMPLX" && shift===1){
     setInput(inp=>inp+"∠")
     setshift(0)
+}
+   else if(selectedMode=="BASEN"&&alpha===1){
+          setInput(inp=>inp+"A")
+          setalpha(0)
+    }
 
-  }
+  
   else{
   
   setInput(inp=>inp+"-")
@@ -623,6 +780,16 @@ function graphplot(){
     setGraphOverlayVisible(true);
     graphready.current = true;
   }
+
+function hyper(){
+  if(selectedMode=="BASEN"&&alpha==1){
+    setInput(inp=>inp+"C")
+    setalpha(0)
+  }
+  else{
+    setshowHypeMenu(true)
+  }
+}
 
 
   function handleRangePlot(start, end) {
@@ -711,19 +878,19 @@ return (
               <button className="calcBtn" onClick={()=>root()}>√x</button>
             </div>
             <div>
-              <p className="label">x^3</p>
+              <p className="label">x^3&nbsp;&nbsp;&nbsp;bin</p>
               <button className="calcBtn" onClick={()=>power()}>x²</button>
             </div>
             <div>
-              <p className="label">ⁿ√y</p>
+              <p className="label">ⁿ√y&nbsp;&nbsp;&nbsp;dec</p>
               <button className="calcBtn" onClick={()=>doublepower()}>xʸ</button>
             </div>
             <div>
-              <p className="label">&nbsp;</p>
+              <p className="label">hex</p>
               <button className="calcBtn" onClick={()=>log()}>Log</button>
             </div>
             <div>
-              <p className="label">eˣ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+              <p className="label">eˣ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;oct</p>
               <button className="calcBtn" onClick={()=>nln()}>Ln</button>
             </div>
 
@@ -738,7 +905,7 @@ return (
             </div>
             <div>
               <p className="label">| x |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;c</p>
-              <button className="calcBtn" onClick={()=>setshowHypeMenu(true)}>hyp</button>
+              <button className="calcBtn" onClick={()=>hyper()}>hyp</button>
             </div>
             <div>
               <p className="label">sin⁻¹&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;e</p>

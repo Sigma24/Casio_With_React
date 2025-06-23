@@ -33,8 +33,7 @@ const ModeMenu = ({ showMenu, setShowMenu, setSelectedMode, reset, onEquationSel
 
   const handleModeClick = (mode) => {
 
-    if(mode=="BASEN")
-      setanswer("Dec000000")
+ 
     if (subMenuData[mode]) {
       setSelectedMode(mode);
       setSelectedItem(mode);

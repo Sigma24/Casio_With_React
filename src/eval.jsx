@@ -613,6 +613,25 @@ const constantsMap = {
       return Math.log(value) / Math.log(base);
     }
 
+    if (calcExpr.includes("Ran#")) {
+    // Return a random number between 0 and 1
+    return Math.random();
+}
+
+if (calcExpr.includes("RandInt(")) {
+    // Parse RandInt(min,max) format
+    const match = expr.match(/^RandInt\((\d+),\s*(\d+)\)$/);
+    if (!match) throw new Error("Invalid RandInt format. Use RandInt(min,max)");
+    
+    const min = parseInt(match[1]);
+    const max = parseInt(match[2]);
+    
+    if (min >= max) throw new Error("Min must be less than max in RandInt");
+    
+    // Return a random integer between min and max (inclusive)
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
         if (constantsMap[displayExpr]) {
       return constantsMap[displayExpr]; // Returns exact string representation
     }
