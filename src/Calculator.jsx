@@ -460,7 +460,7 @@ function dms() {
 
   } else {
     // No answer exists, so just append the degree symbol to input
-    setInput(inp => inp + "°");
+    setInput(prevInput => (prevInput || "") + "°")
   }
 }
 
@@ -474,9 +474,10 @@ function inverse(){
 }
 
 function log (){
-   if(shift===1){
-    // setInput(inp=>inp+"10ˣ(")
-    setshift(0)
+
+ if(selectedMode=="BASEN"){
+    setanswer("Hex000000")
+    setalpha(0)
   }
   else{
    setInput(inp=>inp+"Log(")}
@@ -485,6 +486,7 @@ function logbase(){
   if(shift===1){
   setInput(input=>input+"∑(X=a,b,f(X))->(")
   }
+
   else{
      setInput(input=>input+"logₓy->(")
   }
@@ -494,6 +496,10 @@ function nln(){
   if(shift===1){
     setInput(inp=>inp+"eˣ(")
     setshift(0)
+  }
+  if(selectedMode=="BASEN"){
+    setanswer("Oct000000")
+    setalpha(0)
   }
   else{
   setInput(inp=>inp+"ln(")
@@ -530,12 +536,21 @@ function root(){
 }
 
 function power(){
+      if(selectedMode=="BASEN"){
+    setanswer("Bin000000")
+  
+  }else{
   setInput(inp=>inp+"^2")
+  }
 }
 
 function doublepower(){
+      if(selectedMode=="BASEN"){
+    setanswer("Dec000000")
+  
+  }else{
   setInput(inp=>inp+"xʸ->(")
-}
+}}
 
   function handleDeleteHistoryItem(index) {
     HistoryManager.deleteHistoryItem(index);
@@ -617,6 +632,8 @@ function graphplot(){
     setgraph(true);
     graphready.current = false;
   }
+
+
 
 
 
@@ -895,6 +912,7 @@ return (
             reset={resetshift}
             onEquationSelect={handleEquationSelect}
             onVectorSizeSelect={handleVectorSelect}
+            setanswer={setanswer}
           />
      
         </div>

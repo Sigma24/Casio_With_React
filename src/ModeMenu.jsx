@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "./ModeMenu.css";
 
-const ModeMenu = ({ showMenu, setShowMenu, setSelectedMode, reset, onEquationSelect, onVectorSizeSelect }) => {
+const ModeMenu = ({ showMenu, setShowMenu, setSelectedMode, reset, onEquationSelect, onVectorSizeSelect,setanswer }) => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [secondSelectedItem, setSecondSelectedItem] = useState(null);
 
@@ -9,27 +9,14 @@ const ModeMenu = ({ showMenu, setShowMenu, setSelectedMode, reset, onEquationSel
     "MATH",
     "CMPLX",
     "BASEN",
-    "STATISTICS",
     "EQUATION",
-    "TABLE",
-    "MATRIX",
     "VECTOR"
   ];
 
   const subMenuData = {
-    MATRIX: ["MatA", "MatB", "MatC"],
+
     VECTOR: ["vectA", "vectB", "vectC"],
-    BASEN: ["Decimal", "Binary", "Hexa", "Octal"],
-    STATISTICS: [
-      "1-VAR",
-      "A+BX",
-      "--+CX²",
-      "LN X",
-      "eˣ",
-      "A·Bˣ",
-      "A·Xˣ",
-      "1/X"
-    ],
+
     EQUATION: [
       "anX + bnY = cn",
       "aXn + bnY + cnZ = dn",
@@ -45,6 +32,9 @@ const ModeMenu = ({ showMenu, setShowMenu, setSelectedMode, reset, onEquationSel
   };
 
   const handleModeClick = (mode) => {
+
+    if(mode=="BASEN")
+      setanswer("Dec000000")
     if (subMenuData[mode]) {
       setSelectedMode(mode);
       setSelectedItem(mode);
