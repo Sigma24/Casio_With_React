@@ -1,8 +1,5 @@
-import React from "react";
-import "./conv.css";
-
-const ConstMenu = ({ showConstMenu, setShowConstMenu, setSelectedMode ,setInput,resetshift}) => {
-const modes = [
+// constants.js
+export const constants = [
   { name: "Speed of light in vacuum", symbol: "c", value: "2.99792458 × 10⁸ m/s" },
   { name: "Magnetic constant", symbol: "μ₀", value: "4π × 10⁻⁷ N/A²" },
   { name: "Electric constant", symbol: "ε₀", value: "8.854187817 × 10⁻¹² F/m" },
@@ -44,41 +41,25 @@ const modes = [
   { name: "First radiation constant", symbol: "c₁", value: "3.741771852 × 10⁻¹⁶ W·m²" },
   { name: "Second radiation constant", symbol: "c₂", value: "1.438776877 × 10⁻² m·K" }
 ];
+export const constantsMap = constants.reduce((map, constant) => {
+  map.set(constant.symbol, normalizeConstantValue(constant.value));
+  return map;
+}, new Map());
 
-
-  const handleModeClick = (mode) => {
-    setSelectedMode(mode); 
-    setInput(inp=>inp+mode.symbol)
-    setShowConstMenu(false); 
-    resetshift()
-  };
-
-  return (
-    <>
-      {showConstMenu && (
-        <div className="menu">
-          <a href="#" className="cancel" onClick={() => setShowConstMenu(false)}>
-            Cancel
-          </a>
-          <p className="menu-title">Constants</p>
-       <ul className="menu-list">
-  {modes.map((mode, index) => (
-    <li key={index} className="menu-item" onClick={() => handleModeClick(mode)}>
-      <div className="const-name">{index + 1}: {mode.name}</div>
-      <div className="const-symbol">{mode.symbol}</div>
-      <div className="const-value">{mode.value}</div>
-    </li>
-  ))}
-</ul>
-
-        </div>
-      )}    
-    </>
-  );
-};
-
-export default ConstMenu;
-
-
-
-
+export function normalizeConstantValue(raw) {
+  return raw
+    .replace(/×/g, '*')
+    .replace(/⁻/g, '-')
+    .replace(/\s+/g, '')
+    .replace(/⁰/g, '0')
+    .replace(/¹/g, '1')
+    .replace(/²/g, '2')
+    .replace(/³/g, '3')
+    .replace(/⁴/g, '4')
+    .replace(/⁵/g, '5')
+    .replace(/⁶/g, '6')
+    .replace(/⁷/g, '7')
+    .replace(/⁸/g, '8')
+    .replace(/⁹/g, '9')
+    .replace(/π/g, Math.PI.toString());
+}

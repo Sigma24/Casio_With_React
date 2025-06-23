@@ -389,7 +389,7 @@ function selectmode(){
 
 function sin(){
    if(shift===1){
-    setInput(inp=>inp+"arcsin(")
+    setInput(inp=>inp+"sin⁻¹(")
    }
    else{
       setInput(inp=>inp+"sin(")
@@ -398,7 +398,7 @@ function sin(){
 
 function cos(){
    if(shift===1){
-    setInput(inp=>inp+"arccos(")
+    setInput(inp=>inp+"cos⁻¹(")
    }
    else{
       setInput(inp=>inp+"cos(")
@@ -410,7 +410,7 @@ function cos(){
 
 function tan(){
    if(shift===1){
-    setInput(inp=>inp+"arctan(")
+    setInput(inp=>inp+"tan⁻¹(")
    }
    else{
       setInput(inp=>inp+"tan(")
@@ -474,11 +474,30 @@ function inverse(){
 }
 
 function log (){
-   setInput(inp=>inp+"Log(")
+   if(shift===1){
+    // setInput(inp=>inp+"10ˣ(")
+    setshift(0)
+  }
+  else{
+   setInput(inp=>inp+"Log(")}
+}
+function logbase(){
+  if(shift===1){
+  setInput(input=>input+"∑(X=a,b,f(X))->(")
+  }
+  else{
+     setInput(input=>input+"logₓy->(")
+  }
 }
 
 function nln(){
+  if(shift===1){
+    setInput(inp=>inp+"eˣ(")
+    setshift(0)
+  }
+  else{
   setInput(inp=>inp+"ln(")
+  }
 }
 
 function evaluate(){
@@ -530,6 +549,7 @@ function expe(){
     setInput(inp=>inp+"π")
     setshift(0)
   }
+  
   if (alpha===1){
     setInput(inp=>inp+"e")
     setalpha(0)
@@ -570,6 +590,7 @@ const handleVectorSelect = (name, size) => {
 
 var graphready=useRef(false);
 function graphplot(){
+
   if(!input){
     setInput("fx=")
   }
@@ -660,7 +681,7 @@ return (
             </div>
             <div>
               <p className="label">∑</p>
-              <button className="calcBtn">log₂y</button>
+              <button className="calcBtn" onClick={()=>logbase()}>log₂y</button>
             </div>
 
             {/* Row 3 */}
@@ -669,11 +690,11 @@ return (
               <button className="calcBtn" onClick={()=>fraction()}>x/y</button>
             </div>
             <div>
-              <p className="label">x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mod</p>
+              <p className="label">X&nbsp;&nbsp;&nbsp;</p>
               <button className="calcBtn" onClick={()=>root()}>√x</button>
             </div>
             <div>
-              <p className="label">x̅</p>
+              <p className="label">x^3</p>
               <button className="calcBtn" onClick={()=>power()}>x²</button>
             </div>
             <div>
@@ -681,11 +702,11 @@ return (
               <button className="calcBtn" onClick={()=>doublepower()}>xʸ</button>
             </div>
             <div>
-              <p className="label">10ˣ</p>
+              <p className="label">&nbsp;</p>
               <button className="calcBtn" onClick={()=>log()}>Log</button>
             </div>
             <div>
-              <p className="label">eˣ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;t</p>
+              <p className="label">eˣ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
               <button className="calcBtn" onClick={()=>nln()}>Ln</button>
             </div>
 

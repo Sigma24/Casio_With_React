@@ -36,3 +36,18 @@
     background: darkred;
   }
   
+
+  .graph-wrapper {
+  position: relative;
+  margin-bottom: 20px;
+} 
+
+
+
+ .graph-error {
+  color: #ff4444;
+  padding: 10px;
+  background: #ffeeee;
+  border-radius: 4px;
+  margin-top: 10px;
+}
