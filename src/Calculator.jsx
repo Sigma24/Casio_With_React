@@ -143,8 +143,8 @@ function hell(){
   const handleEquationEvaluate = (inputExpr, resultArr) => {
   const resultStr = Array.isArray(resultArr) ? resultArr.join(', ') : resultArr;
 
-  setInput(inputExpr);     // Replace with how you update calculator input
-  setanswer(resultStr);    // Replace with how you update calculator output
+  setInput(inputExpr);   
+  setanswer(resultStr);    
 };
 
  
@@ -476,7 +476,7 @@ else{
     }
 
   } else {
-    // No answer exists, so just append the degree symbol to input
+   
     setInput(prevInput => (prevInput || "") + "°")
   }
 }
