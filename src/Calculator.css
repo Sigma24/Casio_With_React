@@ -77,6 +77,18 @@
   width: 20%; 
 }
 
+.addBtn {
+  background-color: red;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: clamp(10px, 3vw, 12px); 
+  margin-right: 7px;
+  height: 32px;
+  width: 20%; 
+}
 .modeBtn {
   background-color: rgb(56, 23, 42);
   color: white;

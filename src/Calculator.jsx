@@ -10,6 +10,9 @@
   import ConstMenu from "./const"
   import Graph from "./graph";
   import ConvBtnMenu from "./conv";
+  import FavouritesOverlay from "./favouriteui";
+  import { getFavouritesFromStorage, saveFavouritesToStorage } from './favstorage';
+
  
   import BaseShift from "./base_n";
   import CmplxShift from "./cmplx";
@@ -56,6 +59,9 @@ const [originalDecimal, setOriginalDecimal] = useState(null);
     const [equationType, setEquationType] = useState(null);
    const [graphOverlayVisible, setGraphOverlayVisible] = useState(false);
    const [graphData, setGraphData] = useState({ expression: '', startX: -10, endX: 10 });
+     const [graphDataArray, setGraphDataArray] = useState([]); 
+       const [favouritesVisible, setFavouritesVisible] = useState(false);
+  const [favourites, setFavourites] = useState(getFavouritesFromStorage());
 
 
 
@@ -761,24 +767,31 @@ const handleVectorSelect = (name, size) => {
 
 
 var graphready=useRef(false);
-function graphplot(){
 
-  if(!input){
+
+
+function addfx(){
+    if(!input){
     setInput("fx=")
   }
-   if (!input.startsWith("fx=")) {
-   
-    return;
-    }
+    if (!input.startsWith("fx=")) return;
 
-        const expr = input.slice(3).trim();
+    const expr = input.slice(3).trim();
+    if (!expr || !expr.includes("x")) return;
 
-    if (!expr.includes("x")) {
-      return;
-    }
-    setGraphData(prev => ({ ...prev, expression: expr }));
+    setGraphDataArray(prev => [...prev, expr]);
+    setInput("");
+}
+function graphplot(){
+
+
+    if (graphDataArray.length === 0) return;
+
     setGraphOverlayVisible(true);
     graphready.current = true;
+
+
+    console.log("Plotting:", graphDataArray);
   }
 
 function hyper(){
@@ -800,6 +813,32 @@ function hyper(){
     graphready.current = false;
   }
 
+
+
+  const handleAddToFavourites = () => {
+    if (input.trim()) {
+      const updated = [...favourites, input.trim()];
+      setFavourites(updated);
+      saveFavouritesToStorage(updated);
+      setInput(''); // Clear input if needed
+    }
+  };
+
+  
+  const handleDeleteFavourite = (index) => {
+    const updated = favourites.filter((_, i) => i !== index);
+    setFavourites(updated);
+    saveFavouritesToStorage(updated);
+  };
+
+  function fav(){
+    if (shift===1){
+    setFavouritesVisible(true)
+   
+    }else{
+      handleAddToFavourites()
+    }
+  }
 
 
 
@@ -831,6 +870,7 @@ return (
             <button className="modeBtn" onClick={types}>{text}</button>
             <button className="modeBtn">{modebtntext}</button>
             <button className="modeBtn3">{text_sa}</button>
+              <button className="addBtn" onClick={()=>addfx()}>Add FX</button>
             <button className="graphBtn" onClick={()=>graphplot()}>GRAPH</button>
           </div>
 
@@ -923,7 +963,7 @@ return (
           
             <div>
               <p className="label3">STO&nbsp;&nbsp;CLRv</p>
-              <button className="calcBtn">RCL</button>
+              <button className="calcBtn" onClick={()=>fav()}>⭐</button>
             </div>
             <div>
               <p className="label">i&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cot</p>
@@ -1100,6 +1140,13 @@ return (
   onDelete={handleDeleteHistoryItem}
 />
 
+    <FavouritesOverlay
+  visible={favouritesVisible}
+  onClose={() => setFavouritesVisible(false)}
+  favourites={favourites}
+  onDelete={handleDeleteFavourite}
+/>
+
 <VectorOverlay
   visible={vectorOverlayVisible}
   onClose={() => setVectorOverlayVisible(false)}
@@ -1216,7 +1263,7 @@ return (
 
       {graph && (
         <Graph
-          expression={graphData.expression}
+          expressions={graphDataArray}
           startX={graphData.startX}
           endX={graphData.endX}
           onClose={() => setgraph(false)}
